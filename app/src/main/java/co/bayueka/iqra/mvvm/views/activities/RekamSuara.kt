@@ -1,6 +1,7 @@
 package co.bayueka.iqra.mvvm.views.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.media.MediaRecorder
@@ -20,8 +21,14 @@ import kotlinx.android.synthetic.main.activity_rekam_suara.*
 import java.io.File
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
+import android.widget.Button
+import co.bayueka.iqra.retrofit.DataRepository
+import co.bayueka.iqra.retrofit.PostModel
 import java.io.IOException
 import com.android.volley.Response
+import retrofit2.Call
+import retrofit2.Callback
 
 class RekamSuara : AppCompatActivity() {
 
@@ -37,21 +44,38 @@ class RekamSuara : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_rekam_suara)
 
+//        retrofit get data example
+//        val postServices = DataRepository.create()
+//        postServices.getPosts().enqueue(object : Callback<List<PostModel>> {
+//            override fun onFailure(call: Call<List<PostModel>>, error: Throwable) {
+//                Log.e("retrofit", "errornya ${error.message}")
+//            }
+//
+//            override fun onResponse(
+//                call: Call<List<PostModel>>,
+//                response: retrofit2.Response<List<PostModel>>
+//            ) {
+//                if (response.isSuccessful) {
+//                    val data = response.body()
+//                    Log.d("retrofit", "responsennya ${data?.size}")
+//
+//                    data?.map {
+//                        Log.d("retrofit", "datanya ${it.body}")
+//                    }
+//                }
+//            }
+//        })
+
 
         mediaRecorder = MediaRecorder()
-        //output = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).toString()+"/recording.mp3"
-        output=getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/recording.mp3"
-            //Environment.getExternalStorageDirectory().absolutePath + "/recording.mp3"
-        System.out.print("file output " + output)
-
-
-        var rekam:TextView=findViewById<TextView>(R.id.rekam)
-        rekam.setText(output)
 
         mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+        mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
         mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-        mediaRecorder?.setOutputFile(output)
+
+        val record = findViewById<Button>(R.id.record)
+        val stop = findViewById<Button>(R.id.stop)
+        val play = findViewById<Button>(R.id.play)
 
         record.setOnClickListener {
             if (ContextCompat.checkSelfPermission(
@@ -70,68 +94,39 @@ class RekamSuara : AppCompatActivity() {
                 )
                 ActivityCompat.requestPermissions(this, permissions, 0)
             } else {
-                simpan()
+                startRecorder()
             }
         }
         stop.setOnClickListener {
-            stop()
+            stopRecorder()
+        }
+
+        play.setOnClickListener {
+            play()
         }
 
     }
-    private fun uploadAudio() {
-        var bytes= File(output).readBytes()
 
-//        audioData?: return
-//        val request = object : VolleyFileUploadRequest(
-//            Request.Method.POST,
-//            postURL,
-//            Response.Listener {
-//                println("response is: $it")
-//            },
-//            Response.ErrorListener {
-//                println("error is: $it")
-//            }
-//        ) {
-//            override fun getByteData(): MutableMap<String, FileDataPart> {
-//                var params = HashMap<String, FileDataPart>()
-//                params["imageFile"] = FileDataPart("image", audioData!!, "jpeg")
-//                return params
-//            }
-//        }
-//        Volley.newRequestQueue(this).add(request)
-
-
-    }
-
-
-
-    public fun play(v:View)
+    fun play()
     {
-        var mp= MediaPlayer()
-        mp.setDataSource(output)
+        val mp= MediaPlayer()
+        val mFileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/recording.mp3";
+        mp.setDataSource(mFileName)
         mp.prepare()
         mp.start()
     }
 
-    private fun simpan() {
-        startRecorder()
-    }
-
     private fun startRecorder() {
         try {
-            Toast.makeText(this, "Recording started!", Toast.LENGTH_SHORT).show()
+            val mFileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/recording.mp3";
+            mediaRecorder?.setOutputFile(mFileName)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
             state = true
+            Toast.makeText(this, "Recording started!", Toast.LENGTH_SHORT).show()
         } catch (e: IllegalStateException) {
             e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
-    }
-
-    private fun stop() {
-        stopRecorder()
     }
 
     private fun stopRecorder() {
@@ -139,6 +134,7 @@ class RekamSuara : AppCompatActivity() {
             mediaRecorder?.stop()
             mediaRecorder?.release()
             state = false
+            Toast.makeText(this, "Recording Stop", Toast.LENGTH_SHORT).show()
         }else{
             Toast.makeText(this, "You are not recording right now!", Toast.LENGTH_SHORT).show()
         }
