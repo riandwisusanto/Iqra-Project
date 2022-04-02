@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".mvvm.views.activities.TestListeningActivity">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/iqra_toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:layout_width="@dimen/size0"
+        android:layout_height="@dimen/size0"
+        android:background="@color/teal_700"
+        android:orientation="vertical"
+        android:padding="@dimen/space16"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <TextView
+            android:id="@+id/txtNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/space32"
+            android:text="@string/_1_30"
+            android:textColor="@color/white"
+            android:textSize="@dimen/font16"
+            android:textStyle="bold" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtNumber"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/space48"
+            android:background="@color/backgroundHijaiyah"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imgAnswer"
+                android:layout_width="@dimen/size70"
+                android:layout_height="@dimen/size70"
+                android:layout_margin="@dimen/space32"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/icon"
+                android:scaleType="centerCrop"
+                android:src="@drawable/alif"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/checkAnswer"
+                android:layout_width="@dimen/size30"
+                android:layout_height="@dimen/size30"
+                android:layout_margin="@dimen/space4"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/icon"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_baseline_check"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <RelativeLayout
+            android:id="@+id/relativeMic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/constraintQuestion"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/space48"
+            android:background="@drawable/bg_spinner"
+            android:padding="@dimen/space12">
+
+            <TextView
+                android:id="@+id/txtRecord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/imgMic"
+                android:text="@string/tap_untuk_berbicara" />
+
+            <ImageView
+                android:id="@+id/imgMic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="@string/icon"
+                android:src="@drawable/ic_baseline_mic" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/linearSkip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/space32"
+            android:orientation="vertical"
+            android:padding="@dimen/space8">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/skip"
+                android:textColor="@color/white"
+                android:textSize="@dimen/font16"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

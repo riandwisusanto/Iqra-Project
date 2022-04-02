@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/backgroundHijaiyah"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/space8">
+
+    <ImageView
+        android:id="@+id/imgHijaiyah"
+        android:layout_width="@dimen/size60"
+        android:layout_height="@dimen/size60"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/icon"
+        android:scaleType="centerCrop"
+        android:src="@drawable/alif" />
+
+    <TextView
+        android:id="@+id/txtHijaiyah"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space4"
+        android:text="@string/alif"
+        android:textSize="@dimen/font16" />
+
+</LinearLayout>

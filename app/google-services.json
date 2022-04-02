@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "317632482598",
+    "firebase_url": "https://iqra-9c36c-default-rtdb.firebaseio.com",
+    "project_id": "iqra-9c36c",
+    "storage_bucket": "iqra-9c36c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317632482598:android:4b79500c7beafebee585e7",
+        "android_client_info": {
+          "package_name": "co.bayueka.iqra"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "317632482598-0o68v9as3kisbt5ahdlu92n5b3do414o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABIm6WNd9SCgAt0_pO3CLnnGde-gQ35cs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "317632482598-0o68v9as3kisbt5ahdlu92n5b3do414o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

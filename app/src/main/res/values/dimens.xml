@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SPACE -->
+    <dimen name="minSpace64">-64dp</dimen>
+    <dimen name="space112">112dp</dimen>
+    <dimen name="space80">80dp</dimen>
+    <dimen name="space64">64dp</dimen>
+    <dimen name="space60">60dp</dimen>
+    <dimen name="space56">56dp</dimen>
+    <dimen name="space48">48dp</dimen>
+    <dimen name="space40">40dp</dimen>
+    <dimen name="space34">34dp</dimen>
+    <dimen name="space32">32dp</dimen>
+    <dimen name="space30">30dp</dimen>
+    <dimen name="space28">28dp</dimen>
+    <dimen name="space24">24dp</dimen>
+    <dimen name="space20">20dp</dimen>
+    <dimen name="space18">18dp</dimen>
+    <dimen name="space16">16dp</dimen>
+    <dimen name="space15">15dp</dimen>
+    <dimen name="space12">12dp</dimen>
+    <dimen name="space10">10dp</dimen>
+    <dimen name="space8">8dp</dimen>
+    <dimen name="space6">6dp</dimen>
+    <dimen name="space5">5dp</dimen>
+    <dimen name="space4">4dp</dimen>
+    <dimen name="space2">2dp</dimen>
+    <dimen name="space0">0dp</dimen>
+
+    <!-- FONT -->
+    <dimen name="font32">32sp</dimen>
+    <dimen name="font30">30sp</dimen>
+    <dimen name="font28">28sp</dimen>
+    <dimen name="font24">24sp</dimen>
+    <dimen name="font20">20sp</dimen>
+    <dimen name="font18">18sp</dimen>
+    <dimen name="font16">16sp</dimen>
+    <dimen name="font15">15sp</dimen>
+    <dimen name="font14">14sp</dimen>
+    <dimen name="font13">13sp</dimen>
+    <dimen name="font12">12sp</dimen>
+    <dimen name="font10">10sp</dimen>
+    <dimen name="font4">4sp</dimen>
+
+    <!-- SIZE -->
+    <dimen name="size300">300dp</dimen>
+    <dimen name="size280">280dp</dimen>
+    <dimen name="size270">270dp</dimen>
+    <dimen name="size250">250dp</dimen>
+    <dimen name="size180">180dp</dimen>
+    <dimen name="size165">165dp</dimen>
+    <dimen name="size160">160dp</dimen>
+    <dimen name="size150">150dp</dimen>
+    <dimen name="size130">130dp</dimen>
+    <dimen name="size120">120dp</dimen>
+    <dimen name="size100">100dp</dimen>
+    <dimen name="size85">85dp</dimen>
+    <dimen name="size80">80dp</dimen>
+    <dimen name="size70">70dp</dimen>
+    <dimen name="size60">60dp</dimen>
+    <dimen name="size56">56dp</dimen>
+    <dimen name="size53">53dp</dimen>
+    <dimen name="size50">50dp</dimen>
+    <dimen name="size40">40dp</dimen>
+    <dimen name="size35">35dp</dimen>
+    <dimen name="size30">30dp</dimen>
+    <dimen name="size28">28dp</dimen>
+    <dimen name="size25">25dp</dimen>
+    <dimen name="size24">24dp</dimen>
+    <dimen name="size22">22dp</dimen>
+    <dimen name="size20">20dp</dimen>
+    <dimen name="size18">18dp</dimen>
+    <dimen name="size16">16dp</dimen>
+    <dimen name="size15">15dp</dimen>
+    <dimen name="size14">14dp</dimen>
+    <dimen name="size12">12dp</dimen>
+    <dimen name="size10">10dp</dimen>
+    <dimen name="size5">5dp</dimen>
+    <dimen name="size8">8dp</dimen>
+    <dimen name="size4">4dp</dimen>
+    <dimen name="size2">2dp</dimen>
+    <dimen name="size1">1dp</dimen>
+    <dimen name="size0">0dp</dimen>
+    <dimen name="size380">380dp</dimen>
+    <dimen name="size350">350dp</dimen>
+    <dimen name="size320">320dp</dimen>
+    <dimen name="size200">200dp</dimen>
+    <dimen name="space200">200dp</dimen>
+    <dimen name="space1">1dp</dimen>
+
+</resources>

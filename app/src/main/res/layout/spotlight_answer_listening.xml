@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="false">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/iqra_toolbar"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:layout_width="@dimen/size0"
+        android:layout_height="@dimen/size0"
+        android:padding="@dimen/space16"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <TextView
+            android:id="@+id/txtSpotlight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textAlignment="center"
+            android:text="@string/tekan_tombol_untuk_membuka_microphone_njika_microphone_belum_tertutup_silahkan_tekan_tombol_microphone_lagi_untuk_menutup"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/font16"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtSpotlight"
+            android:layout_marginTop="@dimen/space16"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/nextTarget"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/space16"
+                android:layout_weight="1"
+                android:background="@color/teal_700"
+                android:text="@string/lanjut"
+                android:textColor="@color/white"
+                tools:ignore="ButtonStyle" />
+
+            <Button
+                android:id="@+id/closeSpotlight"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space16"
+                android:layout_weight="1"
+                android:background="@color/teal_700"
+                android:text="@string/tutup"
+                android:textColor="@color/white"
+                tools:ignore="ButtonStyle" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
