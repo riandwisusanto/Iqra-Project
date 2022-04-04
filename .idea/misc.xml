@@ -3,10 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/activity_list_record.xml" value="0.22447916666666667" />
+        <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/activity_main.xml" value="0.221025641025641" />
         <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/activity_rekam_suara.xml" value="0.15" />
         <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/activity_test_listening.xml" value="0.1" />
         <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/activity_test_speaking.xml" value="0.1" />
         <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/activity_training.xml" value="0.22" />
+        <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/iqra_toolbar.xml" value="0.22447916666666667" />
+        <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/item_iqra.xml" value="0.22447916666666667" />
+        <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/item_single_list.xml" value="0.22447916666666667" />
         <entry key="..\:/pejam/pribadi/Iqra/Iqra/app/src/main/res/layout/popup_result_test.xml" value="0.22447916666666667" />
       </map>
     </option>

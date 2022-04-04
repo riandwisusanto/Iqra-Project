@@ -53,4 +53,5 @@
     <string name="tekan_tombol_untuk_membuka_microphone_njika_microphone_belum_tertutup_silahkan_tekan_tombol_microphone_lagi_untuk_menutup">Tekan tombol untuk membuka microphone.\nJika microphone belum tertutup, silahkan tekan tombol microphone lagi untuk menutup.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="listrecord">List Record</string>
 </resources>

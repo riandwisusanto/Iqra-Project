@@ -36,13 +36,14 @@
         <activity
             android:name=".mvvm.views.activities.TrainingActivity"
             android:screenOrientation="portrait" />
-<!--        <activity-->
-<!--            android:name=".mvvm.views.activities.SplashActivity"-->
-<!--            android:screenOrientation="portrait">-->
         <activity
-            android:name=".mvvm.views.activities.RekamSuara"
+            android:name=".mvvm.views.activities.SplashActivity"
             android:screenOrientation="portrait"
             android:exported="true">
+<!--        <activity-->
+<!--            android:name=".mvvm.views.activities.RekamSuara"-->
+<!--            android:screenOrientation="portrait"-->
+<!--            android:exported="true">-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -57,6 +58,9 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".mvvm.views.activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".mvvm.views.activities.ListRecordActivity"
             android:screenOrientation="portrait" />
     </application>
 

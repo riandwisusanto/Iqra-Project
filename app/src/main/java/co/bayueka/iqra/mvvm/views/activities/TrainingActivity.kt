@@ -1,11 +1,15 @@
 package co.bayueka.iqra.mvvm.views.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
+import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Parcelable
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -28,6 +32,8 @@ import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_training.view.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 private const val TAG = "TrainingActivity"
@@ -50,6 +56,9 @@ class TrainingActivity : AppCompatActivity() {
     private lateinit var speechRecognizer: SpeechRecognizer
     private var isMicOn = false
     private var isTraining =true
+
+    private var mediaRecorder: MediaRecorder? = null
+    private var state: Boolean = false
 
     private val database = Firebase.database
     private val myRef = database.reference
@@ -89,7 +98,13 @@ class TrainingActivity : AppCompatActivity() {
         hijaiyahAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
         binding.spinnerHijaiyah.adapter = hijaiyahAdapter
 
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+//        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+
+        mediaRecorder = MediaRecorder()
+
+        mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+        mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+        mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
     }
 
     private fun subscribeListeners() {
@@ -139,100 +154,132 @@ class TrainingActivity : AppCompatActivity() {
             }
         }
 
-        val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        speechRecognizerIntent.putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        )
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,10000)
-//        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-XA")
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "id-ID")
-        speechRecognizer.setRecognitionListener(object : RecognitionListener {
-            override fun onReadyForSpeech(params: Bundle?) {
-                Log.d(TAG, "speechRecognizerIntent: onReadyForSpeech: ")
-            }
-
-            override fun onBeginningOfSpeech() {
-                Log.d(TAG, "speechRecognizerIntent: onBeginningOfSpeech: ")
-                binding.txtRecord.setText(resources.getString(R.string.mendengarkan))
-            }
-
-            override fun onRmsChanged(rmsdB: Float) {
-                //
-            }
-
-            override fun onBufferReceived(buffer: ByteArray?) {
-                Log.d(TAG, "speechRecognizerIntent: onBufferReceived: $buffer")
-            }
-
-            override fun onEndOfSpeech() {
-                Log.d(TAG, "speechRecognizerIntent: onEndOfSpeech: ")
-                isMicOn = false
-                speechRecognizer.stopListening()
-                binding.imgMic.setImageResource(R.drawable.record_btn_recording)
-                binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
-            }
-
-            override fun onError(error: Int) {
-                Log.d(TAG, "speechRecognizerIntent: onError: $error")
-                if (error == 7) {
-                    Toast.makeText(this@TrainingActivity, "Suara tidak dapat dikenali", Toast.LENGTH_SHORT).show()
-                }
-                isMicOn = false
-                binding.imgMic.setImageResource(R.drawable.record_btn_recording)
-                binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
-            }
-
-            override fun onResults(results: Bundle?) {
-                Log.d(TAG, "speechRecognizerIntent: onResults: ")
-                binding.imgMic.setImageResource(R.drawable.record_btn_recording)
-                results?.let {
-                    val data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    Log.d(TAG, "speechRecognizerIntent: onResults: data array $data")
-                    data?.let {
-                        val res = data.get(0).trim().toLowerCase(Locale.getDefault())
-                        Log.d(TAG, "speechRecognizerIntent: onResults: data output ${res}")
-                        checkData(res)
-                    }
-                }
-            }
-
-            override fun onPartialResults(partialResults: Bundle?) {
-                Log.d(TAG, "speechRecognizerIntent: onPartialResults: ")
-            }
-
-            override fun onEvent(eventType: Int, params: Bundle?) {
-                Log.d(TAG, "speechRecognizerIntent: onEvent: ")
-            }
-
-        })
+//        val speechRecognizerIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+//        speechRecognizerIntent.putExtra(
+//            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+//            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+//        )
+//        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,10000)
+////        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-XA")
+//        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "id-ID")
+//        speechRecognizer.setRecognitionListener(object : RecognitionListener {
+//            override fun onReadyForSpeech(params: Bundle?) {
+//                Log.d(TAG, "speechRecognizerIntent: onReadyForSpeech: ")
+//            }
+//
+//            override fun onBeginningOfSpeech() {
+//                Log.d(TAG, "speechRecognizerIntent: onBeginningOfSpeech: ")
+//                binding.txtRecord.setText(resources.getString(R.string.mendengarkan))
+//            }
+//
+//            override fun onRmsChanged(rmsdB: Float) {
+//                //
+//            }
+//
+//            override fun onBufferReceived(buffer: ByteArray?) {
+//                Log.d(TAG, "speechRecognizerIntent: onBufferReceived: $buffer")
+//            }
+//
+//            override fun onEndOfSpeech() {
+//                Log.d(TAG, "speechRecognizerIntent: onEndOfSpeech: ")
+//                isMicOn = false
+//                speechRecognizer.stopListening()
+//                binding.imgMic.setImageResource(R.drawable.record_btn_recording)
+//                binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
+//            }
+//
+//            override fun onError(error: Int) {
+//                Log.d(TAG, "speechRecognizerIntent: onError: $error")
+//                if (error == 7) {
+//                    Toast.makeText(this@TrainingActivity, "Suara tidak dapat dikenali", Toast.LENGTH_SHORT).show()
+//                }
+//                isMicOn = false
+//                binding.imgMic.setImageResource(R.drawable.record_btn_recording)
+//                binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
+//            }
+//
+//            override fun onResults(results: Bundle?) {
+//                Log.d(TAG, "speechRecognizerIntent: onResults: ")
+//                binding.imgMic.setImageResource(R.drawable.record_btn_recording)
+//                results?.let {
+//                    val data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+//                    Log.d(TAG, "speechRecognizerIntent: onResults: data array $data")
+//                    data?.let {
+//                        val res = data.get(0).trim().toLowerCase(Locale.getDefault())
+//                        Log.d(TAG, "speechRecognizerIntent: onResults: data output ${res}")
+//                        checkData(res)
+//                    }
+//                }
+//            }
+//
+//            override fun onPartialResults(partialResults: Bundle?) {
+//                Log.d(TAG, "speechRecognizerIntent: onPartialResults: ")
+//            }
+//
+//            override fun onEvent(eventType: Int, params: Bundle?) {
+//                Log.d(TAG, "speechRecognizerIntent: onEvent: ")
+//            }
+//
+//        })
 
         binding.toolbar.imgBack.setOnClickListener {
             finish()
         }
         binding.imgMic.setOnClickListener {
-            var countError = 0
-            var error = ""
-
-            if (selectedPosition == 0) {
-                countError++
-                error += "Harap Pilih Huruf Hijaiyah !"
-            }
-
-            if (countError == 0) {
-                if (isMicOn) {
-                    isMicOn = false
-                    speechRecognizer.stopListening()
-                    binding.imgMic.setImageResource(R.drawable.record_btn_recording)
-                    binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
-                } else {
-                    isMicOn = true
-                    speechRecognizer.startListening(speechRecognizerIntent)
-                    binding.imgMic.setImageResource(R.drawable.record_btn_stopped)
-                }
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.RECORD_AUDIO
+                ) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                val permissions = arrayOf(
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+                ActivityCompat.requestPermissions(this, permissions, 0)
             } else {
-                Toast.makeText(this@TrainingActivity, error, Toast.LENGTH_SHORT).show()
+                if (selectedPosition == 0) {
+                    Toast.makeText(this@TrainingActivity, "Harap Pilih Huruf Hijaiyah !", Toast.LENGTH_SHORT).show()
+                }
+                else{
+                    if (isMicOn) {
+                        isMicOn = false
+                        stopRecorder()
+                        binding.imgMic.setImageResource(R.drawable.record_btn_recording)
+                        binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
+                    } else {
+                        isMicOn = true
+                        startRecorder()
+                        binding.imgMic.setImageResource(R.drawable.record_btn_stopped)
+                    }
+                }
             }
+//            var countError = 0
+//            var error = ""
+//
+//            if (selectedPosition == 0) {
+//                countError++
+//                error += "Harap Pilih Huruf Hijaiyah !"
+//            }
+//
+//            if (countError == 0) {
+//                if (isMicOn) {
+//                    isMicOn = false
+////                    speechRecognizer.stopListening()
+//                    binding.imgMic.setImageResource(R.drawable.record_btn_recording)
+//                    binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
+//                } else {
+//                    isMicOn = true
+////                    speechRecognizer.startListening(speechRecognizerIntent)
+//                    binding.imgMic.setImageResource(R.drawable.record_btn_stopped)
+//                }
+//            } else {
+//                Toast.makeText(this@TrainingActivity, error, Toast.LENGTH_SHORT).show()
+//            }
 
         }
         //binding.rgOption.setOnCheckedChangeListener{group,checkedId ->
@@ -243,6 +290,9 @@ class TrainingActivity : AppCompatActivity() {
            //     isTraining=false
             //}
         //}
+        binding.recordList.setOnClickListener {
+            startActivity(Intent(this, ListRecordActivity::class.java))
+        }
     }
 
     private fun checkData(input: String) {
@@ -316,6 +366,33 @@ class TrainingActivity : AppCompatActivity() {
             loading!!.dismiss()
             loading = null
         }
+    }
+
+
+
+    @SuppressLint("NewApi")
+    private fun startRecorder() {
+        try {
+            val current = LocalDateTime.now()
+
+            val formatter = DateTimeFormatter.ofPattern("dd_MM_yyy_HH_mm_ss")
+            val formatted = current.format(formatter)
+
+            val mFileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+
+                    "/record_"+ hijaiyahHuruf[selectedPosition] + "_" + formatted.toString() +".mp3";
+            mediaRecorder?.setOutputFile(mFileName)
+            mediaRecorder?.prepare()
+            mediaRecorder?.start()
+            Toast.makeText(this, "Recording started!", Toast.LENGTH_SHORT).show()
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun stopRecorder() {
+        mediaRecorder?.stop()
+        mediaRecorder?.release()
+        Toast.makeText(this, "Recording Stop", Toast.LENGTH_SHORT).show()
     }
 
     @Parcelize
