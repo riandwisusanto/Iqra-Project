@@ -27,6 +27,7 @@ import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityTestSpeakingBinding
 import co.bayueka.iqra.databinding.PopupResultTestBinding
 import co.bayueka.iqra.mvvm.models.HijaiyahModel
+import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
 import co.bayueka.iqra.mvvm.viewmodels.HijaiyahViewModel
 import co.bayueka.iqra.utils.SessionManager
 import com.google.firebase.database.DataSnapshot
@@ -261,7 +262,7 @@ class TestSpeakingActivity : AppCompatActivity() {
                     Log.d(TAG, "subscribeListeners: ${it.key}")
                     it.key?.let { key ->
                         myRef.child("training").child(key).get().addOnSuccessListener { dataSnapshotSample ->
-                            val sample = dataSnapshotSample.getValue(TrainingActivity.TrainingHijaiyahSample::class.java)
+                            val sample = dataSnapshotSample.getValue(TrainingHijaiyahModel::class.java)
                             sample?.let { trainingHijaiyahSample ->
                                 hideLoading()
                                 binding.checkAnswer.visibility = View.VISIBLE

@@ -1,11 +1,21 @@
 package co.bayueka.iqra.retrofit
 
+import okhttp3.MultipartBody
 import retrofit2.Call
-import retrofit2.http.GET
+import retrofit2.http.Body
+import retrofit2.http.Header
+import retrofit2.http.POST
+
 
 interface PostService {
 
-    @GET("posts")
-    fun getPosts(): Call<List<PostModel>>
+//    @GET("posts")
+//    fun getPosts(): Call<List<PostModel>>
+
+    @POST("train")
+    open fun uploadWav(
+        @Header("Content-Type") contentType: String?,
+        @Body body: MultipartBody?
+    ): Call<PostModel>
 
 }

@@ -27,6 +27,9 @@ import co.bayueka.iqra.retrofit.DataRepository
 import co.bayueka.iqra.retrofit.PostModel
 import java.io.IOException
 import com.android.volley.Response
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 
@@ -105,6 +108,11 @@ class RekamSuara : AppCompatActivity() {
             play()
         }
 
+        val post = findViewById<Button>(R.id.post)
+        post.setOnClickListener{
+//            train("/train.wav")
+        }
+
     }
 
     fun play()
@@ -139,6 +147,34 @@ class RekamSuara : AppCompatActivity() {
             Toast.makeText(this, "You are not recording right now!", Toast.LENGTH_SHORT).show()
         }
     }
+
+//    private fun train(soundUrl: String){
+//        val postServices = DataRepository.create()
+//        val fileUri = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS+soundUrl)?.path
+//        val file = File(fileUri)
+//        val fileBody: RequestBody =
+//            RequestBody.create(MediaType.parse("wav"), file)
+//        val body = MultipartBody.Builder()
+//            .addFormDataPart("label", "hallo")
+//            .addFormDataPart("sound", "sound.wav", fileBody)
+//            .build()
+//        postServices.uploadWav(
+//            "multipart/form-data; boundary=" + body.boundary(),
+//            body
+//        ).enqueue(object : Callback<PostModel> {
+//            override fun onResponse(call: Call<PostModel>, response: retrofit2.Response<PostModel>) {
+//                if(response.isSuccessful){
+//                    val data = response.body()
+//                    Log.d("retrofit", "data ${data?.output}")
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<PostModel>, t: Throwable) {
+//                Log.e("retrofit", "errornya ${t.message}")
+//            }
+//
+//        })
+//    }
 
 
 }

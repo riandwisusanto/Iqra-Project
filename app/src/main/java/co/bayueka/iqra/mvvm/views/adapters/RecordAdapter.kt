@@ -11,9 +11,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import co.bayueka.iqra.R
+import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
 
 
-class RecordAdapter(val listData: List<String>, context: Context) : RecyclerView.Adapter<RecordAdapter.ViewHolder>() {
+class RecordAdapter(val listData: List<TrainingHijaiyahModel>, context: Context) : RecyclerView.Adapter<RecordAdapter.ViewHolder>() {
     val context = context
     var onMic = false
     lateinit var mediaPlayer: MediaPlayer
@@ -37,9 +38,10 @@ class RecordAdapter(val listData: List<String>, context: Context) : RecyclerView
 //            holder.btn_play.setImageResource(R.drawable.list_play_btn)
 //        }
 
-        holder.title.text = data
+        holder.title.text = data.keywordHijaiyahId + ".wav"
+        holder.hasil.text = "Hasil Training = "+data.keyword
         holder.btn_play.setOnClickListener {
-            val audio = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/"+data;
+            val audio = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/"+data.keywordHijaiyahId+".wav";
             if(onMic){
                 this.onMic = false
                 holder.btn_play.setImageResource(R.drawable.list_play_btn)
@@ -70,5 +72,6 @@ class RecordAdapter(val listData: List<String>, context: Context) : RecyclerView
     class ViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {
         val btn_play = ItemView.findViewById<ImageView>(R.id.list_image_view)
         val title = ItemView.findViewById<TextView>(R.id.list_title)
+        val hasil = ItemView.findViewById<TextView>(R.id.list_date)
     }
 }

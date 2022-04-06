@@ -5,14 +5,11 @@ import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Parcelable
-import android.speech.RecognitionListener
-import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.View
@@ -22,8 +19,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityTrainingBinding
+import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
+import co.bayueka.iqra.retrofit.DataRepository
+import co.bayueka.iqra.retrofit.PostModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -32,9 +33,17 @@ import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.activity_training.view.*
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+
 
 private const val TAG = "TrainingActivity"
 
@@ -62,6 +71,7 @@ class TrainingActivity : AppCompatActivity() {
 
     private val database = Firebase.database
     private val myRef = database.reference
+    private var baseUrl = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,6 +148,20 @@ class TrainingActivity : AppCompatActivity() {
         myRef.child("training").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 isDataTrainingEmpty = snapshot.getValue() == null
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.w(TAG, "Child Training: Failed to read value.", error.toException())
+            }
+        })
+        myRef.child("baseUrl").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()){
+                    for (vl in snapshot.children){
+                        val value = vl.value
+                        baseUrl = value.toString()
+                    }
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -334,12 +358,12 @@ class TrainingActivity : AppCompatActivity() {
         val id = myRef.push().key
         id?.let {
             isDataTrainingEmpty = false
-            val sample = TrainingHijaiyahSample(
+            val sample = TrainingHijaiyahModel(
                 it,
                 hijaiyahId[selectedPosition],
                 hijaiyahHuruf[selectedPosition],
                 input,
-                "${input}_${hijaiyahId[selectedPosition]}"
+                "${hijaiyahId[selectedPosition]}_${input}"
             )
             myRef.child("training").child(id).setValue(sample)
             Toast.makeText(this, "Berhasil menyimpan data", Toast.LENGTH_SHORT).show()
@@ -368,22 +392,21 @@ class TrainingActivity : AppCompatActivity() {
         }
     }
 
-
-
     @SuppressLint("NewApi")
     private fun startRecorder() {
         try {
-            val current = LocalDateTime.now()
+//            val current = LocalDateTime.now()
+//
+//            val formatter = DateTimeFormatter.ofPattern("dd_MM_yyy_HH_mm_ss")
+//            val formatted = current.format(formatter)
 
-            val formatter = DateTimeFormatter.ofPattern("dd_MM_yyy_HH_mm_ss")
-            val formatted = current.format(formatter)
-
-            val mFileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+
-                    "/record_"+ hijaiyahHuruf[selectedPosition] + "_" + formatted.toString() +".mp3";
-            mediaRecorder?.setOutputFile(mFileName)
+            val fileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+
+                    "/"+ hijaiyahId[selectedPosition] + "_" + hijaiyahHuruf[selectedPosition] +".wav"
+            mediaRecorder?.setOutputFile(fileName)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
             Toast.makeText(this, "Recording started!", Toast.LENGTH_SHORT).show()
+            Log.d("base_url", baseUrl)
         } catch (e: IllegalStateException) {
             e.printStackTrace()
         }
@@ -391,22 +414,52 @@ class TrainingActivity : AppCompatActivity() {
 
     private fun stopRecorder() {
         mediaRecorder?.stop()
+        mediaRecorder?.reset()
         mediaRecorder?.release()
-        Toast.makeText(this, "Recording Stop", Toast.LENGTH_SHORT).show()
+        train()
+        showLoading()
+//        Toast.makeText(this, "Recording Stop", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun train(){
+        val mFileName = "/"+ hijaiyahId[selectedPosition] + "_" + hijaiyahHuruf[selectedPosition] +".wav"
+        val label     = hijaiyahHuruf[selectedPosition]
+
+        val postServices = DataRepository.create(baseUrl)
+        val fileUri = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS+mFileName)?.path
+        val file = File(fileUri)
+        val fileBody: RequestBody =
+            RequestBody.create(MediaType.parse("wav"), file)
+        val body = MultipartBody.Builder()
+            .addFormDataPart("label", label)
+            .addFormDataPart("sound", "sound.wav", fileBody)
+            .build()
+        postServices.uploadWav(
+            "multipart/form-data; boundary=" + body.boundary(),
+            body
+        ).enqueue(object : Callback<PostModel> {
+            override fun onResponse(call: Call<PostModel>, response: retrofit2.Response<PostModel>) {
+                if(response.isSuccessful){
+                    hideLoading()
+                    val data = response.body()
+                    Toast.makeText(this@TrainingActivity, "Hasil train = ${data?.output}", Toast.LENGTH_SHORT).show()
+                    saveData(data?.output.toString())
+//                    Log.d("retrofit", "data ${data?.output}")
+                }
+            }
+
+            override fun onFailure(call: Call<PostModel>, t: Throwable) {
+                hideLoading()
+                Toast.makeText(this@TrainingActivity, "errornya ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("retrofit", "errornya ${t.message}")
+            }
+
+        })
     }
 
     @Parcelize
     data class Hijaiyah(
         var id: String? = null,
         var huruf: String? = null
-    ) : Parcelable {}
-
-    @Parcelize
-    data class TrainingHijaiyahSample(
-        var id: String? = null,
-        var hijaiyahId: String? = null,
-        var hijaiyahHuruf: String? = null,
-        var keyword: String? = null,
-        var keywordHijaiyahId: String? = null,
     ) : Parcelable {}
 }

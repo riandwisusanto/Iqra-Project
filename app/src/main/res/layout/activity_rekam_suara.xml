@@ -26,6 +26,12 @@
             android:layout_height="wrap_content"
             android:text="Play" />
 
+        <Button
+            android:id="@+id/post"
+            android:layout_width="154dp"
+            android:layout_height="wrap_content"
+            android:text="POST" />
+
 
 
 <!--        <Button-->
