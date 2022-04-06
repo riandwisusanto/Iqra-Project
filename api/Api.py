@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request
+from flask import jsonify
 import os
 import json
 import scipy
@@ -89,13 +90,13 @@ def AI():
     ms = [gmmhmm(6) for y in ys]
     _ = [m.fit(X_train[y_train == y, :, :]) for m, y in zip(ms, ys)]
 
-    # print('Testing')
-    # ps = [m.transform(X_test) for m in ms]
-    # res = np.vstack(ps)
-    # predicted_labels = np.argmax(res, axis=0)
+    print('Testing')
+    ps = [m.transform(X_test) for m in ms]
+    res = np.vstack(ps)
+    predicted_labels = np.argmax(res, axis=0)
 
-    # missed = (predicted_labels != y_test)
-    # print('Test accuracy: %.2f percent' % (100 * (1 - np.mean(missed))))
+    missed = (predicted_labels != y_test)
+    print('Test accuracy: %.2f percent' % (100 * (1 - np.mean(missed))))
     
     return "proses launch AI selesai"
 
@@ -130,7 +131,6 @@ def peakfind(x, n_peaks, l_size=3, r_size=3, c_size=3, f=np.mean):
     #Add l_size and half - 1 of center size to get to actual peak location
     top[top > -1] = top[top > -1] + l_size + int(c_size / 2.)
     return heights, top[:n_peaks]
-
 class gmmhmm:
     #This class sudah dimodifikasi dari https://code.google.com/p/hmm-speech-recognition/source/browse/Word.m
     def __init__(self, n_states):
@@ -294,7 +294,7 @@ class gmmhmm:
 
 @app.route('/train', methods=['POST'])
 def train():
-    audio  = request.files['file']
+    audio  = request.files['sound']
     labels = [request.form['label']]
     data = np.zeros((1, 32000))#data list untuk menampung sementara
     maxsize = -1 #size yang terbesar
@@ -331,18 +331,13 @@ def train():
     res_test = np.vstack(ps_test)
     pos      = np.argmax(res_test, axis=0) [0]
 
-    return spoken[pos]
-
-@app.route('/spoken', methods=['GET'])
-def spok():
-    return json.dumps(spoken)
-    
-@app.route('/ms', methods=['GET'])
-def ems():
-    return json.dumps(ms)
+    result   = {
+        'output': spoken[pos]
+    }
+    return jsonify(result)
 
 @app.route("/", methods=['GET'])
 def index():
     return AI()
 
-app.run(debug=True)
+app.run(debug=True, host='', port=5000)
