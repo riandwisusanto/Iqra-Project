@@ -1,37 +1,27 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
-import os
-import json
 import scipy
 from scipy.io import wavfile
 import scipy.stats as st
 import numpy as np
-import sys
 import math
 from numpy.lib.stride_tricks import as_strided
 from sklearn.model_selection import StratifiedShuffleSplit
 
 app = Flask(__name__)
 
-ms = []
+fpaths = []
+labels = []
 spoken = []
 
-def AI():
+def train():
+    global fpaths
+    global labels
     global spoken
-    global ms
 
-    fpaths = []
-    labels = []
-    spoken = []
-    ms     = []
-    for item in os.listdir('Sound_new'):
-        for isi in os.listdir('Sound_new/' + item):
-            fpaths.append('Sound_new/' + item + '/' + isi)
-            labels.append(item)
-            if item not in spoken:
-                spoken.append(item)
-    
+    print("spoken = ", spoken)
+    print("labels = ", labels)
     data = np.zeros((len(fpaths), 32000))#data list untuk menampung sementara
 
     maxsize = -1 #size yang terbesar
@@ -95,10 +85,14 @@ def AI():
     res = np.vstack(ps)
     predicted_labels = np.argmax(res, axis=0)
 
-    missed = (predicted_labels != y_test)
-    print('Test accuracy: %.2f percent' % (100 * (1 - np.mean(missed))))
+    missed   = (predicted_labels != y_test)
+    accurate = 100 * (1 - np.mean(missed))
+    print('Test accuracy: %.2f percent' % accurate)
     
-    return "proses launch AI selesai"
+    fpaths = []
+    labels = []
+    spoken = []
+    return jsonify(accurate)
 
 def stft(x, fftsize=64, overlap_pct=0.5):   
     #Modified dari http://stackoverflow.com/questions/2459295/stft-and-istft-in-python
@@ -293,51 +287,19 @@ class gmmhmm:
             return out
 
 @app.route('/train', methods=['POST'])
-def train():
-    audio  = request.files['sound']
-    labels = [request.form['label']]
-    data = np.zeros((1, 32000))#data list untuk menampung sementara
-    maxsize = -1 #size yang terbesar
-    for n,file in enumerate([audio]):
-        _, d = wavfile.read(file)
-        data[n, :d.shape[0]] = d
-        
-        if d.shape[0] > maxsize:
-            maxsize = d.shape[0]
-    data = data[:, :maxsize]
-    label = np.zeros(data.shape[0])
-    for n, l in enumerate(set(labels)):
-        label[np.array([i for i, _ in enumerate(labels) if _ == l])] = n
-    
-    label.sort()
-    obs_l = []
-    ll  = data.shape[0]
-    N   = math.ceil(ll/10)
-    for i in range(ll):
-        d = np.abs(stft(data[i, :]))
-        dimensi = 6 #ambil 6 potongan, untuk n_peak
-        
-        obs = np.zeros((dimensi, d.shape[0]))
-        for r in range(d.shape[0]):
-            _, t = peakfind(d[r, :], n_peaks=dimensi)
-            obs[:, r] = t.copy()
+def loadAudio():
+    global fpaths
+    global labels
+    global spoken
 
-        obs_l.append(obs)
-    
-    obs_l     = np.atleast_3d(obs_l)
-    obs_l[0] /= obs_l[0].sum(axis=0) 
+    audio  = request.files.getlist('sound[]')
+    for row in audio:
+        filename = row.filename.split('_')
+        fpaths.append(row)
+        labels.append(filename[0])
+        if filename[0] not in spoken:
+            spoken.append(filename[0])
 
-    ps_test  = [m.transform(obs_l) for m in ms]
-    res_test = np.vstack(ps_test)
-    pos      = np.argmax(res_test, axis=0) [0]
+    return train()
 
-    result   = {
-        'output': spoken[pos]
-    }
-    return jsonify(result)
-
-@app.route("/", methods=['GET'])
-def index():
-    return AI()
-
-app.run(debug=True, host='', port=5000)
+app.run(debug=True, host='0.0.0.0', port=5000)

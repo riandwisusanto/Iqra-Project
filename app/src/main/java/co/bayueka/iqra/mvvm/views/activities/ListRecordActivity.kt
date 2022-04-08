@@ -39,6 +39,21 @@ class ListRecordActivity : AppCompatActivity() {
         adapter = RecordAdapter(data, this)
         recyclerView.adapter = adapter
 
+//        myRef.child("baseUrl").addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//                if (snapshot.exists()){
+//                    for (vl in snapshot.children){
+//                        val value = vl.value
+//                        baseUrl = value.toString()
+//                    }
+//                }
+//            }
+//
+//            override fun onCancelled(error: DatabaseError) {
+//                Log.w(TAG, "Child Training: Failed to read value.", error.toException())
+//            }
+//        })
+
         binding.toolbar.imgBack.setOnClickListener {
             finish()
         }
