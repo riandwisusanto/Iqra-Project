@@ -1,7 +1,6 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
-import os
 import scipy
 from scipy.io import wavfile
 import scipy.stats as st
@@ -12,16 +11,17 @@ from sklearn.model_selection import StratifiedShuffleSplit
 
 app = Flask(__name__)
 
+fpaths = []
+labels = []
+spoken = []
+
 def train():
-    fpaths = []
-    labels = []
-    spoken = []
-    for item in os.listdir('Sound'):
-        for isi in os.listdir('Sound/' + item):
-            fpaths.append('Sound/' + item + '/' + isi)
-            labels.append(item)
-            if item not in spoken:
-                spoken.append(item)
+    global fpaths
+    global labels
+    global spoken
+
+    print("spoken = ", spoken)
+    print("labels = ", labels)
     data = np.zeros((len(fpaths), 32000))#data list untuk menampung sementara
 
     maxsize = -1 #size yang terbesar
@@ -286,35 +286,19 @@ class gmmhmm:
                 out[n] = log_likelihood
             return out
 
-
-
-
-
-
 @app.route('/train', methods=['POST'])
 def loadAudio():
-    if os.path.exists("Sound"):
-        os.system('rimraf Sound')
+    global fpaths
+    global labels
+    global spoken
 
-    paths = []
     audio  = request.files.getlist('sound[]')
     for row in audio:
-        path = row.filename.split('_')[0]
-        if path not in paths:
-            os.makedirs("Sound/"+path+"/")
-            paths.append(path)
-        
-        save_path = os.path.join("Sound/"+path+"/", row.filename)
-        row.save(save_path)
-
-    for row in audio:
-        path      = row.filename.split('_')[0]
-        filename = row.filename.split('.')[0]
-        
-        from_url = "Sound/"+path+"/"+row.filename
-        to_url   = "Sound/"+path+"/"+filename+".wav"
-        os.system('ffmpeg -i '+from_url+' '+to_url)
-        os.remove(from_url)
+        filename = row.filename.split('_')
+        fpaths.append(row)
+        labels.append(filename[0])
+        if filename[0] not in spoken:
+            spoken.append(filename[0])
 
     returnAccurate = {
         'output': train()

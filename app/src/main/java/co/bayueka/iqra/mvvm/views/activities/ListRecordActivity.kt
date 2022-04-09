@@ -1,89 +1,187 @@
 package co.bayueka.iqra.mvvm.views.activities
 
+import android.app.ProgressDialog
 import android.os.Bundle
+import android.os.Environment
+import android.os.Parcelable
 import android.util.Log
+import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityListRecordBinding
+import co.bayueka.iqra.mvvm.models.SpeakModel
 import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
 import co.bayueka.iqra.mvvm.views.adapters.RecordAdapter
+import co.bayueka.iqra.retrofit.DataRepository
+import co.bayueka.iqra.retrofit.PostModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.parcel.Parcelize
+import kotlinx.android.synthetic.main.popup_result_test.*
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import java.io.File
 
 class ListRecordActivity : AppCompatActivity() {
     private lateinit var binding: ActivityListRecordBinding
     lateinit var recyclerView: RecyclerView
-    lateinit var data: ArrayList<TrainingHijaiyahModel>
+    lateinit var data: ArrayList<SpeakModel>
+    lateinit var dataLength: ArrayList<Int>
     lateinit var adapter: RecordAdapter
+    lateinit var trainBtn: Button
     private val myRef = Firebase.database.reference
+    private var loading: ProgressDialog? = null
+
+    private var baseUrl = ""
+    private val TAG = "ListRecordActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityListRecordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        loadData()
         initComponent()
     }
 
     private fun initComponent(){
         binding.toolbar.txtTitle.text = resources.getString(R.string.listrecord)
 
+        data = arrayListOf()
+        dataLength = arrayListOf()
+        loadData()
+
         recyclerView = findViewById(R.id.listRecord)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = RecordAdapter(data, this)
         recyclerView.adapter = adapter
 
-//        myRef.child("baseUrl").addListenerForSingleValueEvent(object : ValueEventListener {
-//            override fun onDataChange(snapshot: DataSnapshot) {
-//                if (snapshot.exists()){
-//                    for (vl in snapshot.children){
-//                        val value = vl.value
-//                        baseUrl = value.toString()
-//                    }
-//                }
-//            }
-//
-//            override fun onCancelled(error: DatabaseError) {
-//                Log.w(TAG, "Child Training: Failed to read value.", error.toException())
-//            }
-//        })
+        myRef.child("baseUrl").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()){
+                    for (vl in snapshot.children){
+                        val value = vl.value
+                        baseUrl = value.toString()
+                    }
+                }
+            }
 
+            override fun onCancelled(error: DatabaseError) {
+                Log.w(TAG, "Child Training: Failed to read value.", error.toException())
+            }
+        })
         binding.toolbar.imgBack.setOnClickListener {
             finish()
+        }
+
+        trainBtn = findViewById<Button>(R.id.startTraining)
+        trainBtn.setOnClickListener {
+            var tempData   = "1"
+            var jumlahData = 0
+            data.forEach {
+                if(!tempData.equals(it.hijaiyahId)) {
+                    dataLength.add(jumlahData)
+                    tempData   = it.hijaiyahId!!
+                    jumlahData = 1
+                }
+                else
+                    jumlahData++
+            }.run {
+                dataLength.add(jumlahData)
+
+                if(dataLength.size == dataLength.count { it == jumlahData })
+                    train()
+                else
+                    Toast.makeText(this@ListRecordActivity, "Jumlah suara per Hijaiyah tidak sama", Toast.LENGTH_LONG).show()
+            }
+//            train()
         }
     }
 
     private fun loadData(){
         data = arrayListOf()
 
-        myRef.child("training").addValueEventListener(object : ValueEventListener {
+        myRef.child("hijaiyah")
+            .addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                snapshot.children.forEach {
-                    val training = it.getValue(TrainingHijaiyahModel::class.java)
+                if(snapshot.exists()) {
+                    snapshot.children.forEach {
+                        val hijaiyah = it.getValue(TrainingActivity.Hijaiyah::class.java)
 
-                    data.add(training!!)
+                        myRef.child("spech").child(hijaiyah!!.huruf.toString())
+                            .addValueEventListener(object : ValueEventListener {
+                                override fun onDataChange(p0: DataSnapshot) {
+                                    p0.children.forEach { p0t ->
+                                        val speak = p0t.getValue(SpeakModel::class.java)
+
+                                        data.add(speak!!)
+                                    }
+                                    adapter.notifyDataSetChanged()
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    Log.w(
+                                        "log",
+                                        "Child Hijaiyah: Failed to read value.",
+                                        error.toException()
+                                    )
+                                }
+
+                            })
+                    }
                 }
-                adapter.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.w("log", "Child Hijaiyah: Failed to read value.", error.toException())
+                Log.w(TAG, "Child Hijaiyah: Failed to read value.", error.toException())
             }
 
         })
-//        val storageDirectory =getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)?.absolutePath
-//
-//        File(storageDirectory)
-//            .walk()
-//            .forEach {
-//                if (!it.name.equals("Download"))
-//                    data.add(it.name)
-//            }
     }
+
+    private fun train(){
+        trainBtn.text = "TRAINING..."
+        trainBtn.isEnabled = false
+        val multipartBody = MultipartBody.Builder()
+        for (row in data){
+            val fileUri = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS+"/"+row.fileName+".3gp")?.path
+            val file = File(fileUri)
+            val fileBody = RequestBody.create(MediaType.parse("3gp"), file)
+
+            multipartBody.addFormDataPart("sound[]", row.fileName+".3gp", fileBody)
+        }
+
+        val postServices = DataRepository.create(baseUrl)
+        val body = multipartBody.build()
+        postServices.uploadWav(
+            "multipart/form-data; boundary=" + body.boundary(),
+            body
+        ).enqueue(object : Callback<PostModel> {
+            override fun onResponse(call: Call<PostModel>, response: retrofit2.Response<PostModel>) {
+                if(response.isSuccessful){
+                    trainBtn.text = "START TRAINING"
+                    trainBtn.isEnabled = true
+                    val data = response.body()
+                    Toast.makeText(this@ListRecordActivity, "Hasil akurai train = ${data?.output} persen", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onFailure(call: Call<PostModel>, t: Throwable) {
+                trainBtn.text = "START TRAINING"
+                trainBtn.isEnabled = true
+                Toast.makeText(this@ListRecordActivity, "errornya ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("retrofit", "errornya ${t.message}")
+            }
+
+        })
+    }
+
 }

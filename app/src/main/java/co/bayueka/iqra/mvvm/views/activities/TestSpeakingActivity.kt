@@ -3,7 +3,9 @@ package co.bayueka.iqra.mvvm.views.activities
 import android.Manifest
 import android.app.Dialog
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -68,10 +70,14 @@ class TestSpeakingActivity : AppCompatActivity() {
     private val database = Firebase.database
     private val myRef = database.reference
 
+    lateinit var sharedPreferences: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTestSpeakingBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        sharedPreferences = getSharedPreferences("Score", Context.MODE_PRIVATE)
         checkPermission()
 
         initComponents()
@@ -331,6 +337,11 @@ class TestSpeakingActivity : AppCompatActivity() {
         popupBinding.txtPercentage.text = pecentage
         popupBinding.txtCorrectAnswer.text = String.format(resources.getString(R.string.jawaban_benar), score)
         popupBinding.txtIncorrectAnswer.text = String.format(resources.getString(R.string.jawaban_salah), (30 - score).toString())
+
+        val editor = sharedPreferences.edit()
+        editor.putInt("score_speaking", (score.toDouble() / 30.0 * 100.0).roundToInt())
+        editor.apply()
+
         popupBinding.btnBack.setOnClickListener {
             finish()
         }

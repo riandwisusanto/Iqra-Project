@@ -29,6 +29,9 @@
 <!--            android:screenOrientation="portrait">-->
 <!--        </activity>-->
         <activity
+            android:name=".mvvm.views.activities.TestActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".mvvm.views.activities.TestSpeakingActivity"
             android:screenOrientation="portrait" />
         <activity

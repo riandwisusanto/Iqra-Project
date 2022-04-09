@@ -63,11 +63,9 @@ class TrainingActivity : AppCompatActivity() {
     private val hijaiyahId: MutableList<String> = mutableListOf()
     private val hijaiyahHuruf: MutableList<String> = mutableListOf()
     private var selectedPosition = 0
-    private var isDataTrainingEmpty = true
     private lateinit var hijaiyahAdapter: ArrayAdapter<String>
     private lateinit var speechRecognizer: SpeechRecognizer
     private var isMicOn = false
-    private var isError = false
 
     private var mediaRecorder: MediaRecorder? = null
 
@@ -112,12 +110,6 @@ class TrainingActivity : AppCompatActivity() {
         binding.spinnerHijaiyah.adapter = hijaiyahAdapter
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-
-        mediaRecorder = MediaRecorder()
-
-        mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-        mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
     }
 
     private fun subscribeListeners() {
@@ -157,8 +149,8 @@ class TrainingActivity : AppCompatActivity() {
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedPosition = position
-                if(lastNumber.equals(0))
-                    getLastNumber()
+                lastNumber = 0
+                getLastNumber()
             }
         }
 
@@ -175,7 +167,6 @@ class TrainingActivity : AppCompatActivity() {
             }
 
             override fun onBeginningOfSpeech() {
-                isError = false
                 Log.d(TAG, "speechRecognizerIntent: onBeginningOfSpeech: ")
                 binding.txtRecord.setText(resources.getString(R.string.mendengarkan))
                 startRecorder()
@@ -195,12 +186,12 @@ class TrainingActivity : AppCompatActivity() {
                 speechRecognizer.stopListening()
                 binding.imgMic.setImageResource(R.drawable.record_btn_recording)
                 binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
+                stopRecorder()
             }
 
             override fun onError(error: Int) {
                 Log.d(TAG, "speechRecognizerIntent: onError: $error")
                 if (error == 7) {
-                    isError = true
                     Toast.makeText(this@TrainingActivity, "Suara tidak dapat dikenali", Toast.LENGTH_SHORT).show()
                 }
                 isMicOn = false
@@ -267,7 +258,6 @@ class TrainingActivity : AppCompatActivity() {
                         binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
                     } else {
                         isMicOn = true
-                        startRecorder()
                         speechRecognizer.startListening(speechRecognizerIntent)
                         binding.imgMic.setImageResource(R.drawable.record_btn_stopped)
                     }
@@ -280,20 +270,23 @@ class TrainingActivity : AppCompatActivity() {
     }
 
     private fun saveData(input: String) {
+        showLoading()
         val id = myRef.push().key
         id?.let {
-            isDataTrainingEmpty = false
             val sample = SpeakModel(
                 it,
                 hijaiyahId[selectedPosition],
                 hijaiyahHuruf[selectedPosition],
                 input,
                 lastNumber,
-                lastNumber.toString()+"_"+hijaiyahHuruf[selectedPosition]
+                hijaiyahHuruf[selectedPosition]+"_"+lastNumber.toString()
             )
-            myRef.child("spech").child(id).setValue(sample)
+            myRef.child("spech").child(hijaiyahHuruf[selectedPosition]).child(id).setValue(sample)
+                .addOnSuccessListener {
+                    hideLoading()
+                    lastNumber++
+                }
             Toast.makeText(this, "Berhasil menyimpan data", Toast.LENGTH_SHORT).show()
-            hideLoading()
         }
     }
 
@@ -321,8 +314,13 @@ class TrainingActivity : AppCompatActivity() {
     @SuppressLint("NewApi")
     private fun startRecorder() {
         try {
+            mediaRecorder = MediaRecorder()
+
+            mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+            mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
             val fileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+
-                    "/" + hijaiyahHuruf[selectedPosition] + "_" + lastNumber +".wav"
+                    "/" + hijaiyahHuruf[selectedPosition] + "_" + lastNumber +".3gp"
             mediaRecorder?.setOutputFile(fileName)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
@@ -332,57 +330,29 @@ class TrainingActivity : AppCompatActivity() {
     }
 
     private fun stopRecorder() {
-        mediaRecorder?.stop()
-        mediaRecorder?.reset()
-        mediaRecorder?.release()
+        try {
+            mediaRecorder?.stop()
+            mediaRecorder?.release()
+            mediaRecorder = null
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+        }
     }
 
-//    private fun train(){
-//        val mFileName = "/"+ hijaiyahId[selectedPosition] + "_" + hijaiyahHuruf[selectedPosition] +".wav"
-//        val label     = hijaiyahHuruf[selectedPosition]
-//
-//        val postServices = DataRepository.create(baseUrl)
-//        val fileUri = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS+mFileName)?.path
-//        val file = File(fileUri)
-//        val fileBody: RequestBody =
-//            RequestBody.create(MediaType.parse("wav"), file)
-//        val body = MultipartBody.Builder()
-//            .addFormDataPart("label", label)
-//            .addFormDataPart("sound", "sound.wav", fileBody)
-//            .build()
-//        postServices.uploadWav(
-//            "multipart/form-data; boundary=" + body.boundary(),
-//            body
-//        ).enqueue(object : Callback<PostModel> {
-//            override fun onResponse(call: Call<PostModel>, response: retrofit2.Response<PostModel>) {
-//                if(response.isSuccessful){
-//                    hideLoading()
-//                    val data = response.body()
-//                    Toast.makeText(this@TrainingActivity, "Hasil train = ${data?.output}", Toast.LENGTH_SHORT).show()
-//                    saveData(data?.output.toString())
-////                    Log.d("retrofit", "data ${data?.output}")
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<PostModel>, t: Throwable) {
-//                hideLoading()
-//                Toast.makeText(this@TrainingActivity, "errornya ${t.message}", Toast.LENGTH_SHORT).show()
-//                Log.e("retrofit", "errornya ${t.message}")
-//            }
-//
-//        })
-//    }
-
     fun getLastNumber(){
-        //        get last data speak
+        showLoading()
         myRef.child("spech").child(hijaiyahHuruf[selectedPosition]).orderByChild("number")
             .limitToLast(1)
             .addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                hideLoading()
                 if (snapshot.exists()){
                     for (vl in snapshot.children){
                         val value = vl.getValue(SpeakModel::class.java)
-                        lastNumber = value!!.number!!
+                        value.let {
+                            lastNumber = (it!!.number!! + 1)
+                            Log.d(TAG, it.number.toString())
+                        }
                     }
                 }
             }

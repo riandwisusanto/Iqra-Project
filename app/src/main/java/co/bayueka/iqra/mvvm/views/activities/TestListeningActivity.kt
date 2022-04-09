@@ -1,6 +1,9 @@
 package co.bayueka.iqra.mvvm.views.activities
 
 import android.app.Dialog
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -49,10 +52,14 @@ class TestListeningActivity : AppCompatActivity() {
     private var score = 0
     private var delay = 2000L
 
+    lateinit var sharedPreferences: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTestListeningBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        sharedPreferences = getSharedPreferences("Score", Context.MODE_PRIVATE)
 
         initComponents()
         subscribeListeners()
@@ -372,6 +379,12 @@ class TestListeningActivity : AppCompatActivity() {
         popupBinding.txtPercentage.text = pecentage
         popupBinding.txtCorrectAnswer.text = String.format(resources.getString(R.string.jawaban_benar), score)
         popupBinding.txtIncorrectAnswer.text = String.format(resources.getString(R.string.jawaban_salah), (30 - score).toString())
+
+//        save score in sp
+        val editor = sharedPreferences.edit()
+        editor.putInt("score_listening", (score.toDouble() / 30.0 * 100.0).roundToInt())
+        editor.apply()
+
         popupBinding.btnBack.setOnClickListener {
             finish()
         }

@@ -29,6 +29,14 @@ class SessionManager @Inject constructor(context: Context) {
             editor.apply()
         }
 
+    var spotLightTest: Boolean
+        get() = sharedPreferences.getBoolean(rootPackage + "_spotLightTest", true)
+        set(data) {
+            val editor = sharedPreferences.edit()
+            editor.putBoolean(rootPackage + "_spotLightTest", data)
+            editor.apply()
+        }
+
     var spotlightListening: Boolean
         get() = sharedPreferences.getBoolean(rootPackage + "_spotlightListening", true)
         set(data) {

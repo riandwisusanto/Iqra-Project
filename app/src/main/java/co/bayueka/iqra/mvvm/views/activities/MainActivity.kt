@@ -107,17 +107,10 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
             }
-            linearTestListening.setOnClickListener {
+            linearTest.setOnClickListener {
                 if (!sessionManager.spotlightMain) {
                     startActivity(
-                        Intent(this@MainActivity, TestListeningActivity::class.java)
-                    )
-                }
-            }
-            linearTestSpeaking.setOnClickListener {
-                if (!sessionManager.spotlightMain) {
-                    startActivity(
-                        Intent(this@MainActivity, TestSpeakingActivity::class.java)
+                        Intent(this@MainActivity, TestActivity::class.java)
                     )
                 }
             }
@@ -203,18 +196,18 @@ class MainActivity : AppCompatActivity() {
         val fourRoot=FrameLayout(this)
         val four=layoutInflater.inflate(R.layout.spotlight_answer_listening,fourRoot)
         val fourTarget=Target.Builder()
-            .setAnchor(binding.linearTestListening)
+            .setAnchor(binding.linearTest)
             .setShape(
                 RoundedRectangle(
-                    binding.linearTestListening.height.toFloat(),
-                    binding.linearTestListening.width.toFloat(),
+                    binding.linearTest.height.toFloat(),
+                    binding.linearTest.width.toFloat(),
                     8f
                 )
             ).setOverlay(four)
             .setOnTargetListener(object : OnTargetListener {
                 override fun onStarted() {
                     four.findViewById<TextView>(R.id.txtSpotlight).text=
-                        resources.getString(R.string.spotlight_main_testListening)
+                        resources.getString(R.string.spotlight_main_test)
                 }
                 override fun onEnded() {
 
@@ -223,30 +216,30 @@ class MainActivity : AppCompatActivity() {
             .build()
         targets.add(fourTarget)
 
-        val fiveRoot=FrameLayout(this)
-        val five=layoutInflater.inflate(R.layout.spotlight_answer_listening,fiveRoot)
-        val fiveTarget=Target.Builder()
-            .setAnchor(binding.linearTestSpeaking)
-            .setShape(
-                RoundedRectangle(
-                    binding.linearTestSpeaking.height.toFloat(),
-                    binding.linearTestSpeaking.width.toFloat(),
-                    8f
-            )
-        ).setOverlay(five)
-            .setOnTargetListener(object : OnTargetListener{
-                override fun onStarted() {
-                    five.findViewById<TextView>(R.id.txtSpotlight).text=
-                        resources.getString(R.string.spotlight_main_testSpeaking)
-                }
-
-                override fun onEnded() {
-                    sessionManager.spotlightMain=false
-                    binding.nsvLockable.setScrollingEnabled(true)
-                }
-            })
-            .build()
-        targets.add(fiveTarget)
+//        val fiveRoot=FrameLayout(this)
+//        val five=layoutInflater.inflate(R.layout.spotlight_answer_listening,fiveRoot)
+//        val fiveTarget=Target.Builder()
+//            .setAnchor(binding.linearTestSpeaking)
+//            .setShape(
+//                RoundedRectangle(
+//                    binding.linearTestSpeaking.height.toFloat(),
+//                    binding.linearTestSpeaking.width.toFloat(),
+//                    8f
+//            )
+//        ).setOverlay(five)
+//            .setOnTargetListener(object : OnTargetListener{
+//                override fun onStarted() {
+//                    five.findViewById<TextView>(R.id.txtSpotlight).text=
+//                        resources.getString(R.string.spotlight_main_testSpeaking)
+//                }
+//
+//                override fun onEnded() {
+//                    sessionManager.spotlightMain=false
+//                    binding.nsvLockable.setScrollingEnabled(true)
+//                }
+//            })
+//            .build()
+//        targets.add(fiveTarget)
 
 
         val spotlight = Spotlight.Builder(this@MainActivity)
@@ -273,7 +266,7 @@ class MainActivity : AppCompatActivity() {
         third.findViewById<View>(R.id.nextTarget).setOnClickListener{spotlight.next()}
         four.findViewById<View>(R.id.nextTarget).setOnClickListener{spotlight.next()}
         //five.findViewById<View>(R.id.nextTarget).setOnClickListener { spotlight.next() }
-        five.findViewById<View>(R.id.nextTarget).visibility = View.GONE
+//        five.findViewById<View>(R.id.nextTarget).visibility = View.GONE
 
 
         first.findViewById<View>(R.id.closeSpotlight).setOnClickListener {
@@ -296,11 +289,11 @@ class MainActivity : AppCompatActivity() {
             binding.nsvLockable.setScrollingEnabled(true)
             spotlight.finish()
         }
-        five.findViewById<View>(R.id.closeSpotlight).setOnClickListener {
-            sessionManager.spotlightMain=false
-            binding.nsvLockable.setScrollingEnabled(true)
-            spotlight.finish()
-        }
+//        five.findViewById<View>(R.id.closeSpotlight).setOnClickListener {
+//            sessionManager.spotlightMain=false
+//            binding.nsvLockable.setScrollingEnabled(true)
+//            spotlight.finish()
+//        }
     }
 
 }
