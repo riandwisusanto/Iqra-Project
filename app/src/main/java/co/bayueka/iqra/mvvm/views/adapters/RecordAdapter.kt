@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import co.bayueka.iqra.R
 import co.bayueka.iqra.mvvm.models.SpeakModel
 import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
+import java.io.File
 
 
 class RecordAdapter(val listData: List<SpeakModel>, context: Context) : RecyclerView.Adapter<RecordAdapter.ViewHolder>() {
@@ -42,7 +43,8 @@ class RecordAdapter(val listData: List<SpeakModel>, context: Context) : Recycler
         holder.title.text = data.fileName
         holder.hasil.text = "Hasil Suara = "+data.keyword
         holder.btn_play.setOnClickListener {
-            val audio = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/"+data.fileName+".3gp";
+//            val audio = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/"+data.fileName+".3gp";
+            val audio = File( context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(),data.fileName+".3gp")
             if(onMic){
                 this.onMic = false
                 holder.btn_play.setImageResource(R.drawable.list_play_btn)
@@ -55,7 +57,7 @@ class RecordAdapter(val listData: List<SpeakModel>, context: Context) : Recycler
                 holder.btn_play.setImageResource(R.drawable.list_pause_btn)
 
                 mediaPlayer = MediaPlayer()
-                mediaPlayer.setDataSource(audio)
+                mediaPlayer.setDataSource(audio.absolutePath)
                 mediaPlayer.prepareAsync()
                 mediaPlayer.setOnPreparedListener{ mp -> mp.start() }
                 mediaPlayer.setOnCompletionListener {

@@ -288,8 +288,8 @@ class TestListeningActivity : AppCompatActivity() {
 
     private fun showQuestion() {
         binding.apply {
-            if (number <= 30) {
-                txtNumber.text = String.format(binding.root.context.resources.getString(R.string._1_30), number)
+            if (number <= 15) {
+                txtNumber.text = String.format(binding.root.context.resources.getString(R.string._1_15), number)
 
                 checkAnswer1.visibility = View.GONE
                 checkAnswer2.visibility = View.GONE
@@ -375,15 +375,30 @@ class TestListeningActivity : AppCompatActivity() {
         dialog.setCancelable(false)
         dialog.show()
 
-        val pecentage = (score.toDouble() / 30.0 * 100.0).roundToInt().toString() + "%"
+        val pecentage = (score.toDouble() / 15.0 * 100.0).roundToInt().toString() + "%"
         popupBinding.txtPercentage.text = pecentage
         popupBinding.txtCorrectAnswer.text = String.format(resources.getString(R.string.jawaban_benar), score)
-        popupBinding.txtIncorrectAnswer.text = String.format(resources.getString(R.string.jawaban_salah), (30 - score).toString())
+        popupBinding.txtIncorrectAnswer.text = String.format(resources.getString(R.string.jawaban_salah), (15 - score).toString())
 
 //        save score in sp
         val editor = sharedPreferences.edit()
-        editor.putInt("score_listening", (score.toDouble() / 30.0 * 100.0).roundToInt())
+        editor.putInt("score_listening", (score.toDouble() / 15.0 * 100.0).roundToInt())
         editor.apply()
+
+        if((score.toDouble() / 15.0 * 100.0) >= 80){
+            popupBinding.btnTurn.text = "Lanjut Test Berbicara"
+            popupBinding.btnTurn.setOnClickListener {
+                startActivity(
+                    Intent(this, TestSpeakingActivity::class.java)
+                )
+            }
+        } else{
+            popupBinding.btnTurn.text = "Ulangi Test Mendengar"
+            popupBinding.btnTurn.setOnClickListener {
+                finish();
+                startActivity(getIntent());
+            }
+        }
 
         popupBinding.btnBack.setOnClickListener {
             finish()

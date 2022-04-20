@@ -39,7 +39,7 @@ class TestActivity : AppCompatActivity() {
             linearTestSpeaking.setOnClickListener {
                 if (scorelistening > 79)
                     startActivity(
-                        Intent(this@TestActivity, TestListeningActivity::class.java)
+                        Intent(this@TestActivity, TestSpeakingActivity::class.java)
                     )
                 else
                     Toast.makeText(this@TestActivity, "Capai score 80 untuk membuka test membaca", Toast.LENGTH_LONG).show()

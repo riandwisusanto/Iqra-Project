@@ -21,13 +21,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityTrainingBinding
 import co.bayueka.iqra.mvvm.models.SpeakModel
-import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
-import co.bayueka.iqra.retrofit.DataRepository
-import co.bayueka.iqra.retrofit.PostModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -35,16 +31,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.activity_training.view.*
-import okhttp3.MediaType
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -319,9 +306,10 @@ class TrainingActivity : AppCompatActivity() {
             mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            val fileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+
-                    "/" + hijaiyahHuruf[selectedPosition] + "_" + lastNumber +".3gp"
-            mediaRecorder?.setOutputFile(fileName)
+//            val fileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+
+//                    "/" + hijaiyahHuruf[selectedPosition] + "_" + lastNumber +".3gp"
+            val fileName = File( Environment.getExternalStorageDirectory(),hijaiyahHuruf[selectedPosition] + "_" + lastNumber +".3gp")
+            mediaRecorder?.setOutputFile(fileName.absolutePath)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
         } catch (e: IllegalStateException) {

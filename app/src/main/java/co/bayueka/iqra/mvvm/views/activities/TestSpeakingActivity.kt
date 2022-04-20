@@ -297,8 +297,8 @@ class TestSpeakingActivity : AppCompatActivity() {
 
     private fun showQuestion() {
         binding.apply {
-            if (number <= 30) {
-                txtNumber.text = String.format(binding.root.context.resources.getString(R.string._1_30), number)
+            if (number <= 15) {
+                txtNumber.text = String.format(binding.root.context.resources.getString(R.string._1_15), number)
 
                 checkAnswer.visibility = View.GONE
 
@@ -333,14 +333,20 @@ class TestSpeakingActivity : AppCompatActivity() {
         dialog.show()
 
         popupBinding.txtTitle.text = resources.getString(R.string.test_pengucapan_huruf_hijaiyah)
-        val pecentage = (score.toDouble() / 30.0 * 100.0).roundToInt().toString() + "%"
+        val pecentage = (score.toDouble() / 15.0 * 100.0).roundToInt().toString() + "%"
         popupBinding.txtPercentage.text = pecentage
         popupBinding.txtCorrectAnswer.text = String.format(resources.getString(R.string.jawaban_benar), score)
-        popupBinding.txtIncorrectAnswer.text = String.format(resources.getString(R.string.jawaban_salah), (30 - score).toString())
+        popupBinding.txtIncorrectAnswer.text = String.format(resources.getString(R.string.jawaban_salah), (15 - score).toString())
 
         val editor = sharedPreferences.edit()
-        editor.putInt("score_speaking", (score.toDouble() / 30.0 * 100.0).roundToInt())
+        editor.putInt("score_speaking", (score.toDouble() / 15.0 * 100.0).roundToInt())
         editor.apply()
+
+        popupBinding.btnTurn.text = "Ulangi Test Berbicara"
+        popupBinding.btnTurn.setOnClickListener {
+            finish();
+            startActivity(getIntent());
+        }
 
         popupBinding.btnBack.setOnClickListener {
             finish()

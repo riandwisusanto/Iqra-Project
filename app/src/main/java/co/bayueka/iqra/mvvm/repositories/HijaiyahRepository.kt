@@ -49,9 +49,9 @@ class HijaiyahRepository @Inject constructor(): CoroutineScope {
         dataHijaiyah.add(HijaiyahModel(R.drawable.kaf, "Kaf", R.raw.kaf))
         dataHijaiyah.add(HijaiyahModel(R.drawable.qof, "Qof", R.raw.qof))
 
+        dataHijaiyah.add(HijaiyahModel(R.drawable.lam_alif, "Lam Alif", R.raw.lam_alif))
         dataHijaiyah.add(HijaiyahModel(R.drawable.ya, "Ya", R.raw.ya))
         dataHijaiyah.add(HijaiyahModel(R.drawable.hamzah, "Hamzah", R.raw.hamzah))
-        dataHijaiyah.add(HijaiyahModel(R.drawable.lam_alif, "Lam Alif", R.raw.lam_alif))
         dataHijaiyah.add(HijaiyahModel(R.drawable.ha, "Ha", R.raw.ha))
         dataHijaiyah.add(HijaiyahModel(R.drawable.wawu, "Wawu", R.raw.wawu))
 

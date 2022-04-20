@@ -32,7 +32,7 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/space32"
-            android:text="@string/_1_30"
+            android:text="@string/_1_15"
             android:textColor="@color/white"
             android:textSize="@dimen/font16"
             android:textStyle="bold" />

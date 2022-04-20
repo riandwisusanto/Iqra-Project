@@ -59,11 +59,21 @@
             android:textSize="@dimen/font16" />
 
         <Button
-            android:id="@+id/btnBack"
+            android:id="@+id/btnTurn"
             android:layout_width="match_parent"
             android:layout_height="@dimen/size30"
             android:layout_marginHorizontal="@dimen/space32"
             android:layout_marginTop="@dimen/space40"
+            android:background="@drawable/bg_button_white"
+            android:text=""
+            android:textColor="@color/teal_700" />
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/size30"
+            android:layout_marginHorizontal="@dimen/space32"
+            android:layout_marginTop="@dimen/space5"
             android:background="@drawable/bg_button_white"
             android:text="@string/kembali_ke_menu_utama"
             android:textColor="@color/teal_700" />
