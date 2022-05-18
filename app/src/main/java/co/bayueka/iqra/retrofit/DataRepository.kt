@@ -1,12 +1,11 @@
 package co.bayueka.iqra.retrofit
 
+import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 
 object DataRepository {
-
     fun create(baseUrl: String): PostService {
         val okHttpClient = OkHttpClient.Builder()
             .connectTimeout(1, TimeUnit.HOURS)

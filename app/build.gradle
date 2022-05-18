@@ -5,21 +5,43 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'com.google.gms.google-services'
-//    id 'com.google.gms.google-services'
+
+    id 'com.chaquo.python'
 }
 
 android {
-    compileSdk 31
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "co.bayueka.iqra"
-        minSdkVersion 21
-        targetSdk 31
+        minSdkVersion 24
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        sourceSets {
+            main {
+                python.srcDir "src/main/python"
+            }
+        }
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+
+        python {
+            buildPython "C:/Users/Rian03/AppData/Local/Programs/Python/Python38-32/python.exe"
+
+            pip {
+                install "pydub"
+                install "scipy"
+                install "joblib"
+                install "numpy"
+            }
+        }
     }
 
     buildTypes {
@@ -34,44 +56,43 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility "1.8"
-        targetCompatibility "1.8"
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
         jvmTarget = '1.8'
         freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+    }
 }
 
 dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.5.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'androidx.core:core-ktx:1.5.0'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.firebase:firebase-database-ktx:20.0.4'
-    //noinspection GradleCompatible
-    testImplementation 'com.android.support:support-v4:28.0.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     //material design components
-    implementation 'com.google.android.material:material:1.7.0-alpha01'
+    implementation 'com.google.android.material:material:1.2.0-alpha04'
     //material volley
     implementation 'com.android.volley:volley:1.2.1'
 
     // Lifecycle + ViewModel & LiveData
-    //noinspection GradleDependency
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_viewmodel_livedata_version"
-    //noinspection GradleDependency
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_viewmodel_livedata_version"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_viewmodel_livedata_version"
-    //noinspection GradleDependency
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_viewmodel_livedata_version"
-    //noinspection GradleDependency
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_viewmodel_livedata_version"
 
     // Coroutines
@@ -85,7 +106,6 @@ dependencies {
     kapt "androidx.hilt:hilt-compiler:$hilt_version"
 
     // Fragment
-    //noinspection GradleDependency
     implementation "androidx.fragment:fragment-ktx:$fragment_kotlin_version"
 
     // Spotlight
@@ -98,12 +118,13 @@ dependencies {
 
     //Android Jetpak Navigation
     def nav_version ="2.2.0"
-    //noinspection GradleDependency
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
-    //noinspection GradleDependency
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    //Implemntasi retrofit
+    implementation "com.squareup.retrofit2:retrofit:2.4.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.4.0"
+
+    implementation 'com.arthenica:mobile-ffmpeg-full:4.4'
 
 }

@@ -50,7 +50,46 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/mengenal_30_huruf_hijaiyah"
+                    android:text="@string/mengenal_29_huruf_hijaiyah"
+                    android:textSize="@dimen/font14" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearHuruf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_main_menu"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/space8">
+
+            <ImageView
+                android:layout_width="@dimen/size80"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/icon"
+                android:src="@drawable/quran" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space16"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/belajar_huruf"
+                    android:textSize="@dimen/font15"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/belajar_huruf"
                     android:textSize="@dimen/font14" />
 
             </LinearLayout>
@@ -320,14 +359,14 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/test"
+                    android:text="@string/latihan"
                     android:textSize="@dimen/font15"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/test_mendengarkan_huruf_hijaiyah"
+                    android:text="@string/latihan_huruf_hijaiyah"
                     android:textSize="@dimen/font14" />
 
             </LinearLayout>
@@ -341,7 +380,8 @@
             android:background="@drawable/bg_main_menu"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="@dimen/space8">
+            android:padding="@dimen/space8"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/quran"
@@ -360,7 +400,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/training_suara"
+                    android:text="@string/input_suara"
                     android:textSize="@dimen/font15"
                     android:textStyle="bold" />
 

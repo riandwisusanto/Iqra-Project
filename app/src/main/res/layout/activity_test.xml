@@ -12,7 +12,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
-    
+
     <LinearLayout
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         android:layout_width="match_parent"
@@ -53,7 +53,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/test_pengucapan_huruf_hijaiyah"
+                    android:text="@string/test_mendengarkan_huruf_hijaiyah"
                     android:textSize="@dimen/font14" />
 
             </LinearLayout>
@@ -67,7 +67,8 @@
             android:background="@drawable/bg_main_menu"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="@dimen/space8">
+            android:padding="@dimen/space8"
+            android:visibility="gone">
 
             <ImageView
                 android:layout_width="@dimen/size80"
@@ -86,14 +87,14 @@
                     android:id="@+id/textSpeaking"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/test_pengucapan"
+                    android:text="@string/test_mengeja"
                     android:textSize="@dimen/font15"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/test_pengucapan_huruf_hijaiyah"
+                    android:text="@string/test_mengeja_huruf_hijaiyah"
                     android:textSize="@dimen/font14" />
 
             </LinearLayout>

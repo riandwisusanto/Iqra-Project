@@ -1,7 +1,6 @@
 package co.bayueka.iqra.mvvm.views.adapters
 
 import android.content.Context
-import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Environment
 import android.view.LayoutInflater
@@ -12,11 +11,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import co.bayueka.iqra.R
 import co.bayueka.iqra.mvvm.models.SpeakModel
-import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
-import java.io.File
 
-
-class RecordAdapter(val listData: List<SpeakModel>, context: Context) : RecyclerView.Adapter<RecordAdapter.ViewHolder>() {
+class RecordAdapter (
+    val listData: List<SpeakModel>, context: Context) : RecyclerView.Adapter<RecordAdapter.ViewHolder>() {
     val context = context
     var onMic = false
     lateinit var mediaPlayer: MediaPlayer
@@ -41,10 +38,10 @@ class RecordAdapter(val listData: List<SpeakModel>, context: Context) : Recycler
 //        }
 
         holder.title.text = data.fileName
-        holder.hasil.text = "Hasil Suara = "+data.keyword
+//        holder.hasil.text = "Hasil Suara = "+ data.keyword
+        holder.hasil.text = data.date
         holder.btn_play.setOnClickListener {
-//            val audio = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/"+data.fileName+".3gp";
-            val audio = File( context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString(),data.fileName+".3gp")
+            val audio = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+"/"+data.fileName+".3gp";
             if(onMic){
                 this.onMic = false
                 holder.btn_play.setImageResource(R.drawable.list_play_btn)
@@ -57,7 +54,7 @@ class RecordAdapter(val listData: List<SpeakModel>, context: Context) : Recycler
                 holder.btn_play.setImageResource(R.drawable.list_pause_btn)
 
                 mediaPlayer = MediaPlayer()
-                mediaPlayer.setDataSource(audio.absolutePath)
+                mediaPlayer.setDataSource(audio)
                 mediaPlayer.prepareAsync()
                 mediaPlayer.setOnPreparedListener{ mp -> mp.start() }
                 mediaPlayer.setOnCompletionListener {
@@ -73,10 +70,8 @@ class RecordAdapter(val listData: List<SpeakModel>, context: Context) : Recycler
     }
 
     class ViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {
-        val btn_play = ItemView.findViewById<ImageView>(R.id.list_image_view)
+        val btn_play = ItemView.findViewById<ImageView>(R.id.btnAudio)
         val title = ItemView.findViewById<TextView>(R.id.list_title)
         val hasil = ItemView.findViewById<TextView>(R.id.list_date)
     }
-
-
 }

@@ -2,6 +2,7 @@ package co.bayueka.iqra.mvvm.views.activities
 
 import android.content.Intent
 import android.os.*
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.view.animation.DecelerateInterpolator
@@ -10,6 +11,8 @@ import android.widget.TextView
 import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityMainBinding
 import co.bayueka.iqra.utils.SessionManager
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.takusemba.spotlight.OnSpotlightListener
 import com.takusemba.spotlight.OnTargetListener
 import com.takusemba.spotlight.Spotlight
@@ -44,14 +47,13 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.nsvLockable.setScrollingEnabled(true)
         }
-
     }
 
     private fun subscribeListeners() {
         binding.apply {
             linearTraining.setOnClickListener {
                 if (!sessionManager.spotlightMain) {
-                    startActivity(Intent(this@MainActivity, TrainingActivity::class.java))
+                    startActivity(Intent(this@MainActivity, InputDataSpeakingActivity::class.java))
                 }
             }
             linearHijaiyah.setOnClickListener {
@@ -111,6 +113,13 @@ class MainActivity : AppCompatActivity() {
                 if (!sessionManager.spotlightMain) {
                     startActivity(
                         Intent(this@MainActivity, TestActivity::class.java)
+                    )
+                }
+            }
+            linearHuruf.setOnClickListener {
+                if (!sessionManager.spotlightMain) {
+                    startActivity(
+                        Intent(this@MainActivity, BelajarHurufHijaiyah::class.java)
                     )
                 }
             }
@@ -179,7 +188,7 @@ class MainActivity : AppCompatActivity() {
                     binding.linearIqro2.height.toFloat(),
                     binding.linearIqro2.width.toFloat(),
                     8f
-                    )
+                )
             ).setOverlay(third)
             .setOnTargetListener(object : OnTargetListener {
                 override fun onStarted() {
@@ -264,9 +273,9 @@ class MainActivity : AppCompatActivity() {
         first.findViewById<View>(R.id.nextTarget).setOnClickListener { spotlight.next() }
         second.findViewById<View>(R.id.nextTarget).setOnClickListener { spotlight.next() }
         third.findViewById<View>(R.id.nextTarget).setOnClickListener{spotlight.next()}
-        four.findViewById<View>(R.id.nextTarget).setOnClickListener{spotlight.next()}
+//        four.findViewById<View>(R.id.nextTarget).setOnClickListener{spotlight.next()}
         //five.findViewById<View>(R.id.nextTarget).setOnClickListener { spotlight.next() }
-//        five.findViewById<View>(R.id.nextTarget).visibility = View.GONE
+        four.findViewById<View>(R.id.nextTarget).visibility = View.GONE
 
 
         first.findViewById<View>(R.id.closeSpotlight).setOnClickListener {

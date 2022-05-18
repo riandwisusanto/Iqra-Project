@@ -5,11 +5,12 @@ import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioFormat
+import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Parcelable
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -22,33 +23,28 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import co.bayueka.iqra.R
-import co.bayueka.iqra.databinding.ActivityTrainingBinding
-import co.bayueka.iqra.mvvm.models.SpeakModel
+import co.bayueka.iqra.databinding.ActivityBelajarHurufBinding
+import co.bayueka.iqra.mvvm.views.activities.InputDataSpeakingActivity.Companion.RECORD_AUDIO_REQUEST_CODE
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.parcel.Parcelize
-import java.io.File
+import com.arthenica.mobileffmpeg.FFmpeg;
+import java.io.*
 import java.util.*
-
 
 private const val TAG = "TrainingActivity"
 
-@AndroidEntryPoint
-class TrainingActivity : AppCompatActivity() {
+class BelajarHurufHijaiyah : AppCompatActivity() {
 
-    companion object {
-        val RECORD_AUDIO_REQUEST_CODE = 1
-    }
-
-    private lateinit var binding: ActivityTrainingBinding
-
+    private lateinit var binding: ActivityBelajarHurufBinding
     private var loading: ProgressDialog? = null
     private val hijaiyahId: MutableList<String> = mutableListOf()
     private val hijaiyahHuruf: MutableList<String> = mutableListOf()
+    private val hijaiyahImg: MutableList<Int> = mutableListOf()
     private var selectedPosition = 0
     private lateinit var hijaiyahAdapter: ArrayAdapter<String>
     private lateinit var speechRecognizer: SpeechRecognizer
@@ -63,7 +59,7 @@ class TrainingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityTrainingBinding.inflate(layoutInflater)
+        binding = ActivityBelajarHurufBinding.inflate(layoutInflater)
         setContentView(binding.root)
         checkPermission()
 
@@ -71,12 +67,35 @@ class TrainingActivity : AppCompatActivity() {
         subscribeListeners()
     }
 
+    private fun initComponents() {
+        binding.toolbar.txtTitle.text = resources.getString(R.string.latihan_huruf_hijaiyah)
+
+        hijaiyahId.add("0")
+        hijaiyahHuruf.add(resources.getString(R.string.pilih_huruf))
+        hijaiyahImg.add(0)
+
+        hijaiyahAdapter = ArrayAdapter(this, R.layout.item_spinner_arrow_selected, hijaiyahHuruf)
+        hijaiyahAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
+        binding.spinnerHijaiyah.adapter = hijaiyahAdapter
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+
+        if(!Python.isStarted())
+            Python.start(AndroidPlatform(this))
+
+        val py = Python.getInstance()
+        val pyObj = py.getModule("python")
+
+        val pyCall = pyObj.callAttr("train", File( Environment.getExternalStorageDirectory(), "audio.wav").absolutePath)
+        Log.d("train", pyCall.toString())
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == RECORD_AUDIO_REQUEST_CODE) {
             if (grantResults.size > 0) {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this@TrainingActivity, "Permission Didapatkan", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Permission Didapatkan", Toast.LENGTH_SHORT).show()
                 } else {
                     checkPermission()
                 }
@@ -86,17 +105,12 @@ class TrainingActivity : AppCompatActivity() {
         }
     }
 
-    private fun initComponents() {
-        binding.toolbar.txtTitle.text = resources.getString(R.string.training_huruf_hijaiyah)
-
-        hijaiyahId.add("0")
-        hijaiyahHuruf.add(resources.getString(R.string.pilih_huruf))
-
-        hijaiyahAdapter = ArrayAdapter(this, R.layout.item_spinner_arrow_selected, hijaiyahHuruf)
-        hijaiyahAdapter.setDropDownViewResource(R.layout.item_spinner_dropdown)
-        binding.spinnerHijaiyah.adapter = hijaiyahAdapter
-
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+    private fun checkPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), RECORD_AUDIO_REQUEST_CODE)
+            }
+        }
     }
 
     private fun subscribeListeners() {
@@ -109,7 +123,7 @@ class TrainingActivity : AppCompatActivity() {
                 hijaiyahId.add("0")
                 hijaiyahHuruf.add(resources.getString(R.string.pilih_huruf))
                 snapshot.children.forEach {
-                    val hijaiyah = it.getValue(Hijaiyah::class.java)
+                    val hijaiyah = it.getValue(InputDataSpeakingActivity.Hijaiyah::class.java)
                     hijaiyah?.let {
                         it.id?.let {
                             hijaiyahId.add(it)
@@ -124,10 +138,41 @@ class TrainingActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "Child Hijaiyah: Failed to read value.", error.toException())
+                Log.w("erorr", "Child Hijaiyah: Failed to read value.", error.toException())
             }
 
         })
+
+//        add hijaiyah img
+        hijaiyahImg.add(R.drawable.alif)
+        hijaiyahImg.add(R.drawable.ba)
+        hijaiyahImg.add(R.drawable.ta)
+        hijaiyahImg.add(R.drawable.tsa)
+        hijaiyahImg.add(R.drawable.jim)
+        hijaiyahImg.add(R.drawable.kha)
+        hijaiyahImg.add(R.drawable.kho)
+        hijaiyahImg.add(R.drawable.dal)
+        hijaiyahImg.add(R.drawable.dzal)
+        hijaiyahImg.add(R.drawable.ra)
+        hijaiyahImg.add(R.drawable.za)
+        hijaiyahImg.add(R.drawable.sin)
+        hijaiyahImg.add(R.drawable.syin)
+        hijaiyahImg.add(R.drawable.shod)
+        hijaiyahImg.add(R.drawable.dhod)
+        hijaiyahImg.add(R.drawable.tho)
+        hijaiyahImg.add(R.drawable.dhlo)
+        hijaiyahImg.add(R.drawable.ain)
+        hijaiyahImg.add(R.drawable.ghoin)
+        hijaiyahImg.add(R.drawable.fa)
+        hijaiyahImg.add(R.drawable.qof)
+        hijaiyahImg.add(R.drawable.kaf)
+        hijaiyahImg.add(R.drawable.lam)
+        hijaiyahImg.add(R.drawable.mim)
+        hijaiyahImg.add(R.drawable.nun)
+        hijaiyahImg.add(R.drawable.wawu)
+        hijaiyahImg.add(R.drawable.ha)
+        hijaiyahImg.add(R.drawable.hamzah)
+        hijaiyahImg.add(R.drawable.ya)
 
         binding.spinnerHijaiyah.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -136,8 +181,7 @@ class TrainingActivity : AppCompatActivity() {
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedPosition = position
-                lastNumber = 0
-                getLastNumber()
+                binding.hurufSelect.setImageResource(hijaiyahImg[position])
             }
         }
 
@@ -178,12 +222,13 @@ class TrainingActivity : AppCompatActivity() {
 
             override fun onError(error: Int) {
                 Log.d(TAG, "speechRecognizerIntent: onError: $error")
-                if (error == 7) {
-                    Toast.makeText(this@TrainingActivity, "Suara tidak dapat dikenali", Toast.LENGTH_SHORT).show()
-                }
+//                if (error == 7) {
+//                    Toast.makeText(this@BelajarHurufHijaiyah, "Suara tidak dapat dikenali", Toast.LENGTH_SHORT).show()
+//                }
                 isMicOn = false
                 binding.imgMic.setImageResource(R.drawable.record_btn_recording)
                 binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
+                stopRecorder()
             }
 
             override fun onResults(results: Bundle?) {
@@ -195,7 +240,6 @@ class TrainingActivity : AppCompatActivity() {
                     data?.let {
                         val res = data.get(0).trim().toLowerCase(Locale.getDefault())
                         Log.d(TAG, "speechRecognizerIntent: onResults: data output ${res}")
-                        saveData(res)
                     }
                 }
             }
@@ -232,15 +276,15 @@ class TrainingActivity : AppCompatActivity() {
             } else {
                 if (selectedPosition == 0) {
                     Toast.makeText(
-                        this@TrainingActivity,
+                        this,
                         "Harap Pilih Huruf Hijaiyah !",
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
                     if (isMicOn) {
                         isMicOn = false
-                        stopRecorder()
                         speechRecognizer.stopListening()
+                        stopRecorder()
                         binding.imgMic.setImageResource(R.drawable.record_btn_recording)
                         binding.txtRecord.setText(resources.getString(R.string.tap_untuk_berbicara))
                     } else {
@@ -250,51 +294,6 @@ class TrainingActivity : AppCompatActivity() {
                     }
                 }
             }
-        }
-        binding.recordList.setOnClickListener {
-            startActivity(Intent(this, ListRecordActivity::class.java))
-        }
-    }
-
-    private fun saveData(input: String) {
-        showLoading()
-        val id = myRef.push().key
-        id?.let {
-            val sample = SpeakModel(
-                it,
-                hijaiyahId[selectedPosition],
-                hijaiyahHuruf[selectedPosition],
-                input,
-                lastNumber,
-                hijaiyahHuruf[selectedPosition]+"_"+lastNumber.toString()
-            )
-            myRef.child("spech").child(hijaiyahHuruf[selectedPosition]).child(id).setValue(sample)
-                .addOnSuccessListener {
-                    hideLoading()
-                    lastNumber++
-                }
-            Toast.makeText(this, "Berhasil menyimpan data", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun checkPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), RECORD_AUDIO_REQUEST_CODE)
-            }
-        }
-    }
-
-    fun showLoading() {
-        if (loading == null) {
-            loading = ProgressDialog.show(this, null, "Harap Tunggu ...", true, false)
-        }
-    }
-
-    fun hideLoading() {
-        if (loading != null) {
-            loading!!.dismiss()
-            loading = null
         }
     }
 
@@ -306,9 +305,7 @@ class TrainingActivity : AppCompatActivity() {
             mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-//            val fileName = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString()+
-//                    "/" + hijaiyahHuruf[selectedPosition] + "_" + lastNumber +".3gp"
-            val fileName = File( Environment.getExternalStorageDirectory(),hijaiyahHuruf[selectedPosition] + "_" + lastNumber +".3gp")
+            val fileName = File( Environment.getExternalStorageDirectory(), "audio_temp.mp3")
             mediaRecorder?.setOutputFile(fileName.absolutePath)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
@@ -318,42 +315,24 @@ class TrainingActivity : AppCompatActivity() {
     }
 
     private fun stopRecorder() {
-        try {
-            mediaRecorder?.stop()
-            mediaRecorder?.release()
-            mediaRecorder = null
-        } catch (e: IllegalStateException) {
-            e.printStackTrace()
+        if(mediaRecorder != null){
+            try {
+                mediaRecorder?.stop()
+                mediaRecorder?.release()
+                mediaRecorder = null
+            } catch (e: IllegalStateException) {
+                e.printStackTrace()
+            }
         }
+
+        FFmpeg.execute("-i "+ File( Environment.getExternalStorageDirectory(), "audio_temp.mp3").absolutePath + " " + File( Environment.getExternalStorageDirectory(), "audio.wav").absolutePath)
+        if(!Python.isStarted())
+            Python.start(AndroidPlatform(this))
+
+        val py = Python.getInstance()
+        val pyObj = py.getModule("python")
+
+        val pyCall = pyObj.callAttr("train", File( Environment.getExternalStorageDirectory(), "audio.wav").absolutePath)
+        Log.d("train", pyCall.toString())
     }
-
-    fun getLastNumber(){
-        showLoading()
-        myRef.child("spech").child(hijaiyahHuruf[selectedPosition]).orderByChild("number")
-            .limitToLast(1)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                hideLoading()
-                if (snapshot.exists()){
-                    for (vl in snapshot.children){
-                        val value = vl.getValue(SpeakModel::class.java)
-                        value.let {
-                            lastNumber = (it!!.number!! + 1)
-                            Log.d(TAG, it.number.toString())
-                        }
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "Child Training: Failed to read value.", error.toException())
-            }
-        })
-    }
-
-    @Parcelize
-    data class Hijaiyah(
-        var id: String? = null,
-        var huruf: String? = null
-    ) : Parcelable {}
 }

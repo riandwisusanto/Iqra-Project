@@ -67,8 +67,8 @@ class HijaiyahActivity : AppCompatActivity() {
             layoutManager = LockableGridLayoutManager(this@HijaiyahActivity, 5)
             rvHijaiyah.layoutManager = layoutManager
             rvHijaiyah.setHasFixedSize(true)
-            rvHijaiyah.setItemViewCacheSize(20)
-            rvHijaiyah.addItemDecoration(GridSpacingItemDecorationHelper(5, 5, true))
+            rvHijaiyah.setItemViewCacheSize(15)
+            rvHijaiyah.addItemDecoration(GridSpacingItemDecorationHelper(5, 4, true))
             rvHijaiyah.adapter = adapter
             toolbar.txtTitle.text = root.context.resources.getString(R.string.hijaiyah)
         }

@@ -1,19 +1,18 @@
 package co.bayueka.iqra.mvvm.views.activities
 
 import android.app.ProgressDialog
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.os.Parcelable
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityListRecordBinding
 import co.bayueka.iqra.mvvm.models.SpeakModel
-import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
 import co.bayueka.iqra.mvvm.views.adapters.RecordAdapter
 import co.bayueka.iqra.retrofit.DataRepository
 import co.bayueka.iqra.retrofit.PostModel
@@ -22,8 +21,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.popup_result_test.*
+import kotlinx.android.synthetic.main.activity_list_record.*
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -51,7 +49,6 @@ class ListRecordActivity : AppCompatActivity() {
 
         initComponent()
     }
-
     private fun initComponent(){
         binding.toolbar.txtTitle.text = resources.getString(R.string.listrecord)
 
@@ -70,6 +67,7 @@ class ListRecordActivity : AppCompatActivity() {
                     for (vl in snapshot.children){
                         val value = vl.value
                         baseUrl = value.toString()
+                        Log.d("base_url", value.toString())
                     }
                 }
             }
@@ -81,6 +79,7 @@ class ListRecordActivity : AppCompatActivity() {
         binding.toolbar.imgBack.setOnClickListener {
             finish()
         }
+
 
         trainBtn = findViewById<Button>(R.id.startTraining)
         trainBtn.setOnClickListener {
@@ -97,7 +96,8 @@ class ListRecordActivity : AppCompatActivity() {
             }.run {
                 dataLength.add(jumlahData)
 
-                if(dataLength.size == dataLength.count { it == jumlahData })
+                if(dataLength.size == dataLength.count {
+                        it == jumlahData })
                     train()
                 else
                     Toast.makeText(this@ListRecordActivity, "Jumlah suara per Hijaiyah tidak sama", Toast.LENGTH_LONG).show()
@@ -111,45 +111,46 @@ class ListRecordActivity : AppCompatActivity() {
 
         myRef.child("hijaiyah")
             .addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.exists()) {
-                    snapshot.children.forEach {
-                        val hijaiyah = it.getValue(TrainingActivity.Hijaiyah::class.java)
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if(snapshot.exists()) {
+                        snapshot.children.forEach {
+                            val hijaiyah = it.getValue(InputDataSpeakingActivity.Hijaiyah::class.java)
 
-                        myRef.child("spech").child(hijaiyah!!.huruf.toString())
-                            .addValueEventListener(object : ValueEventListener {
-                                override fun onDataChange(p0: DataSnapshot) {
-                                    p0.children.forEach { p0t ->
-                                        val speak = p0t.getValue(SpeakModel::class.java)
+                            myRef.child("spech").child(hijaiyah!!.huruf.toString())
+                                .addValueEventListener(object : ValueEventListener {
+                                    override fun onDataChange(p0: DataSnapshot) {
+                                        p0.children.forEach { p0t ->
+                                            val speak = p0t.getValue(SpeakModel::class.java)
 
-                                        data.add(speak!!)
+                                            data.add(speak!!)
+                                        }
+                                        adapter.notifyDataSetChanged()
                                     }
-                                    adapter.notifyDataSetChanged()
-                                }
 
-                                override fun onCancelled(error: DatabaseError) {
-                                    Log.w(
-                                        "log",
-                                        "Child Hijaiyah: Failed to read value.",
-                                        error.toException()
-                                    )
-                                }
+                                    override fun onCancelled(error: DatabaseError) {
+                                        Log.w(
+                                            "log",
+                                            "Child Hijaiyah: Failed to read value.",
+                                            error.toException()
+                                        )
+                                    }
 
-                            })
+                                })
+                        }
                     }
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                Log.w(TAG, "Child Hijaiyah: Failed to read value.", error.toException())
-            }
+                override fun onCancelled(error: DatabaseError) {
+                    Log.w(TAG, "Child Hijaiyah: Failed to read value.", error.toException())
+                }
 
-        })
+            })
     }
 
     private fun train(){
         trainBtn.text = "TRAINING..."
         trainBtn.isEnabled = false
+        txtAkurasi.visibility= View.VISIBLE
         val multipartBody = MultipartBody.Builder()
         for (row in data){
             val fileUri = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS+"/"+row.fileName+".3gp")?.path
@@ -170,7 +171,8 @@ class ListRecordActivity : AppCompatActivity() {
                     trainBtn.text = "START TRAINING"
                     trainBtn.isEnabled = true
                     val data = response.body()
-                    Toast.makeText(this@ListRecordActivity, "Hasil akurai train = ${data?.output} persen", Toast.LENGTH_LONG).show()
+                    txtAkurasi.text="Hasil akurasi train = ${data?.output} %"
+                    Toast.makeText(this@ListRecordActivity, "Hasil akurasi train = ${data?.output} %", Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -184,4 +186,9 @@ class ListRecordActivity : AppCompatActivity() {
         })
     }
 
+    fun showLoading() {
+        if (loading == null) {
+            loading = ProgressDialog.show(this, null, "Harap Tunggu ...", true, false)
+        }
+    }
 }

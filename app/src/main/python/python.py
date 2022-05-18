@@ -1,109 +1,20 @@
-from flask import Flask
-from flask import request
-from flask import jsonify
-import os
-import scipy
 from scipy.io import wavfile
-import scipy.stats as st
+import joblib
 import numpy as np
-import math
+import scipy
 from numpy.lib.stride_tricks import as_strided
-from sklearn.model_selection import StratifiedShuffleSplit
-
-app = Flask(__name__)
-
-def train():
-    fpaths = []
-    labels = []
-    spoken = []
-    for item in os.listdir('Sound'):
-        for isi in os.listdir('Sound/' + item):
-            fpaths.append('Sound/' + item + '/' + isi)
-            labels.append(item)
-            if item not in spoken:
-                spoken.append(item)
-    data = np.zeros((len(fpaths), 32000))#data list untuk menampung sementara
-
-    maxsize = -1 #size yang terbesar
-
-    for n,file in enumerate(fpaths):
-        _, d = wavfile.read(file)
-        data[n, :d.shape[0]] = d
-        
-        if d.shape[0] > maxsize:
-            maxsize = d.shape[0]
-    data = data[:, :maxsize] #agar panjang data sama
-
-    #Each sample file is one row in data, and has one entry in labels
-    all_labels = np.zeros(data.shape[0])
-    for n, l in enumerate(set(labels)):
-        all_labels[np.array([i for i, _ in enumerate(labels) if _ == l])] = n #untuk menandai nama lebel 0,0,1,....
-
-    all_labels.sort()
-
-    k=1
-    all_obs = []
-    ll=data.shape[0]
-    N=math.ceil(ll/10)
-
-    for i in range(ll):
-        d = np.abs(stft(data[i, :]))
-        dimensi = 6 #ambil 6 potongan, untuk n_peak
-        
-        obs = np.zeros((dimensi, d.shape[0]))
-        for r in range(d.shape[0]):
-            _, t = peakfind(d[r, :], n_peaks=dimensi)
-            obs[:, r] = t.copy()
-        if i % N == 0:
-            print("Processed obs %s"  % (10*k), "%")
-            k=k+1
-        #data dimasukan kedalam array
-        all_obs.append(obs)
-        
-    all_obs = np.atleast_3d(all_obs)
-
-    sss = StratifiedShuffleSplit(n_splits=1, test_size=0.4, random_state=1)
-
-    for n,i in enumerate(all_obs): #Normalisasi, dibagi jumlah semuanya, probabilitas
-        all_obs[n] /= all_obs[n].sum(axis=0) 
-
-    for train_index, test_index in sss.split(all_obs,all_labels):
-        X_train=all_obs[train_index, ...]
-        X_test=all_obs[test_index, ...]
-        y_train=all_labels[train_index]
-        y_test=all_labels[test_index]
-    print('Size of training matrix:', X_train.shape)
-    print('Size of testing matrix:', X_test.shape)
-
-    ys = set(all_labels)
-    print('Training')
-    ms = [gmmhmm(6) for y in ys]
-    _ = [m.fit(X_train[y_train == y, :, :]) for m, y in zip(ms, ys)]
-
-    print('Testing')
-    ps = [m.transform(X_test) for m in ms]
-    res = np.vstack(ps)
-    predicted_labels = np.argmax(res, axis=0)
-
-    missed   = (predicted_labels != y_test)
-    accurate = 100 * (1 - np.mean(missed))
-    print('Test accuracy: %.2f percent' % accurate)
-    
-    fpaths = []
-    labels = []
-    spoken = []
-    return accurate
-
-def stft(x, fftsize=64, overlap_pct=0.5):   
-    #Modified dari http://stackoverflow.com/questions/2459295/stft-and-istft-in-python
+import scipy.stats as st
+from os.path import dirname, join
+            
+def stft(x, fftsize=60, overlap_pct=0.5): #asli 64
+    #Modified from http://stackoverflow.com/questions/2459295/stft-and-istft-in-python
     hop = int(fftsize * (1 - overlap_pct))
+    w = scipy.hanning(fftsize + 1)[:-1]    
+    # penjelasan hanning di buku
     
-    w = scipy.hanning(fftsize + 1)[:-1]  
-    #hanning adalah nilai maksimum dinormalisasi menjadi satu
-    #titik puncak yang dibentuk dengan menggunakan kosinus berbobot
     raw = np.array([np.fft.rfft(w * x[i:i + fftsize]) for i in range(0, len(x) - fftsize, hop)])
     return raw[:, :(fftsize // 2)]
-    
+
 def peakfind(x, n_peaks, l_size=3, r_size=3, c_size=3, f=np.mean):
     win_size = l_size + r_size + c_size
     shape = x.shape[:-1] + (x.shape[-1] - win_size + 1, win_size)
@@ -119,14 +30,69 @@ def peakfind(x, n_peaks, l_size=3, r_size=3, c_size=3, f=np.mean):
             return np.max(c)
         else:
             return -1
+        
     r = np.apply_along_axis(is_peak, 1, xs)
     top = np.argsort(r, None)[::-1]
     heights = r[top[:n_peaks]]
     #Add l_size and half - 1 of center size to get to actual peak location
     top[top > -1] = top[top > -1] + l_size + int(c_size / 2.)
     return heights, top[:n_peaks]
+
+def AmbilFitur(d):
+    maxsize = -1
+    
+    fftsize0=60     
+        
+    overlap0=0.5
+  
+    #1. SAMAKAN UKURAN
+#     _ , d = wavfile.read(nama_file)
+    s = np.zeros(32000) #32000 data list penampung sementara
+   
+    s[:d.shape[0]] = d
+    s = s[:maxsize]# agar panjang data sama
+    
+    #2. STFT
+    d = np.abs(stft(s,fftsize0,overlap0)) #60  0.5
+#     print('d.shape',d.shape)    
+    
+    #3. FITUR EKSTRAKSI, 4 PUNCAK TIAP INTEVAL
+    n_dim = 4  # ambil 4 PUNCAK TIAP WINDOWS INTERVAL, =>  n_peaks  
+
+    obs = np.zeros((n_dim, d.shape[0]))
+    #print('awal',obs.shape)
+
+    for r in range(d.shape[0]):
+        _, t = peakfind(d[r, :], n_peaks = n_dim)
+        obs[:, r] = t.copy()
+    
+    #4. NORMALISASI
+    obs = obs/obs.sum(axis=0)
+    return obs
+
+def train(inp):
+    ms_load = joblib.load(join(dirname(__file__), 'save_ms.pkl'))
+    spoken_load = joblib.load(join(dirname(__file__), 'save_spoken.pkl'))
+
+    return ms_load
+
+    # LOAD 
+    _ , d = wavfile.read(inp)
+
+    #AMBILFITUR
+    x = AmbilFitur(d)
+
+    #TESTING
+    ps = [m.transform(x) for m in ms_load]  # data training ms
+    #print(ps)
+    res = np.vstack(ps)
+
+    #HASIL TESTING
+    pos=np.argmax(res, axis=0)[0]
+    return spoken_load[pos]
+
 class gmmhmm:
-    #This class sudah dimodifikasi dari https://code.google.com/p/hmm-speech-recognition/source/browse/Word.m
+    #This class converted with modifications from https://code.google.com/p/hmm-speech-recognition/source/browse/Word.m
     def __init__(self, n_states):
         self.n_states = n_states
         self.random_state = np.random.RandomState(0)
@@ -137,8 +103,9 @@ class gmmhmm:
         
         self.mu = None
         self.covs = None
-        self.dimensi = None
-           
+        self.n_dims = None
+        
+        
     def _forward(self, B):
         log_likelihood = 0.
         T = B.shape[1]
@@ -189,13 +156,13 @@ class gmmhmm:
     
     def _em_init(self, obs):
         #Using this _em_init function allows for less required constructor args
-        if self.dimensi is None:
-            self.dimensi = obs.shape[0]
+        if self.n_dims is None:
+            self.n_dims = obs.shape[0]
         if self.mu is None:
-            subset = self.random_state.choice(np.arange(self.dimensi), size=self.n_states, replace=False)
+            subset = self.random_state.choice(np.arange(self.n_dims), size=self.n_states, replace=False)
             self.mu = obs[:, subset]
         if self.covs is None:
-            self.covs = np.zeros((self.dimensi, self.dimensi, self.n_states))
+            self.covs = np.zeros((self.n_dims, self.n_dims, self.n_states))
             self.covs += np.diag(np.diag(np.cov(obs)))[:, :, None]
         return self
     
@@ -222,8 +189,8 @@ class gmmhmm:
         expected_prior = gamma[:, 0]
         expected_A = self._stochasticize(xi_sum)
         
-        expected_mu = np.zeros((self.dimensi, self.n_states))
-        expected_covs = np.zeros((self.dimensi, self.dimensi, self.n_states))
+        expected_mu = np.zeros((self.n_dims, self.n_states))
+        expected_covs = np.zeros((self.n_dims, self.n_dims, self.n_states))
         
         gamma_state_sum = np.sum(gamma, axis=1)
         #Set zeros to 1 before dividing
@@ -236,8 +203,8 @@ class gmmhmm:
             #Symmetrize
             partial_covs = np.triu(partial_covs) + np.triu(partial_covs).T - np.diag(partial_covs)
         
-        #Pastikan semidefinite positif, dengan menambahkan pembebanan diagonal
-        expected_covs += .01 * np.eye(self.dimensi)[:, :, None]
+        #Ensure positive semidefinite by adding diagonal loading
+        expected_covs += .01 * np.eye(self.n_dims)[:, :, None]
         
         self.prior = expected_prior
         self.mu = expected_mu
@@ -247,11 +214,11 @@ class gmmhmm:
     
     def fit(self, obs, n_iter=15):
         #Support for 2D and 3D arrays
-        #2D should be n_features, dimensi
-        #3D should be n_examples, n_features, dimensi
-        #For example, with 6 features per speech segment, 290 different words
+        #2D should be n_features, n_dims
+        #3D should be n_examples, n_features, n_dims
+        #For example, with 6 features per speech segment, 105 different words
         #this array should be size
-        #(290, 6, X) where X is the number of frames with features extracted
+        #(105, 6, X) where X is the number of frames with features extracted
         #For a single example file, the array should be size (6, X)
         if len(obs.shape) == 2:
             for i in range(n_iter):
@@ -267,11 +234,11 @@ class gmmhmm:
     
     def transform(self, obs):
         #Support for 2D and 3D arrays
-        #2D should be n_features, dimensi
-        #3D should be n_examples, n_features, dimensi
-        #For example, with 6 features per speech segment, 290 different words
+        #2D should be n_features, n_dims
+        #3D should be n_examples, n_features, n_dims
+        #For example, with 6 features per speech segment, 105 different words
         #this array should be size
-        #(290, 6, X) where X is the number of frames with features extracted
+        #(105, 6, X) where X is the number of frames with features extracted
         #For a single example file, the array should be size (6, X)
         if len(obs.shape) == 2:
             B = self._state_likelihood(obs)
@@ -286,39 +253,34 @@ class gmmhmm:
                 out[n] = log_likelihood
             return out
 
+if __name__ == "__main__":
+    rstate = np.random.RandomState(0)
+    t1 = np.ones((4, 40)) + .001 * rstate.rand(4, 40)
+    t1 /= t1.sum(axis=0)
+    t2 = rstate.rand(*t1.shape)
+    t2 /= t2.sum(axis=0)
+    
+    m1 = gmmhmm(2)
+    m1.fit(t1)
+    m2 = gmmhmm(2)
+    m2.fit(t2)
+    
+#     m1t1 = m1.transform(t1)
+#     m2t1 = m2.transform(t1)
+#     print("Likelihoods for test set 1")
+#     print("M1:", m1t1)
+#     print("M2:", m2t1)
+#     print("Prediction for test set 1")
+#     print("Model", np.argmax([m1t1, m2t1]) + 1)
+#     print()
+    
+#     m1t2 = m1.transform(t2)
+#     m2t2 = m2.transform(t2)
+#     print("Likelihoods for test set 2")
+#     print("M1:", m1t2)
+#     print("M2:", m2t2)
+#     print("Prediction for test set 2")
+#     print("Model", np.argmax([m1t2, m2t2]) + 1)
 
-
-
-
-
-@app.route('/train', methods=['POST'])
-def loadAudio():
-    if os.path.exists("Sound"):
-        os.system('rimraf Sound')
-
-    paths = []
-    audio  = request.files.getlist('sound[]')
-    for row in audio:
-        path = row.filename.split('_')[0]
-        if path not in paths:
-            os.makedirs("Sound/"+path+"/")
-            paths.append(path)
-        
-        save_path = os.path.join("Sound/"+path+"/", row.filename)
-        row.save(save_path)
-
-    for row in audio:
-        path      = row.filename.split('_')[0]
-        filename = row.filename.split('.')[0]
-        
-        from_url = "Sound/"+path+"/"+row.filename
-        to_url   = "Sound/"+path+"/"+filename+".wav"
-        os.system('ffmpeg -i '+from_url+' '+to_url)
-        os.remove(from_url)
-
-    returnAccurate = {
-        'output': train()
-    }
-    return jsonify(returnAccurate)
-
-app.run(debug=True, host='0.0.0.0', port=5000)
+if __name__ == '__main__':
+    print(train("result.wav"))

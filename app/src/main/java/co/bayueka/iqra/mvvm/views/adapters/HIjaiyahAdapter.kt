@@ -1,12 +1,10 @@
 package co.bayueka.iqra.mvvm.views.adapters
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ItemHijaiyahBinding
 import co.bayueka.iqra.mvvm.models.HijaiyahModel
 
@@ -31,18 +29,12 @@ class HIjaiyahAdapter: ListAdapter<HijaiyahModel, HIjaiyahAdapter.ViewHolder>(Di
     inner class ViewHolder(private val binding: ItemHijaiyahBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(model: HijaiyahModel) {
             binding.apply {
-                if(model.title != "Lam Alif") {
-                    txtHijaiyah.text = model.title
-                    imgHijaiyah.setImageResource(model.img)
-                    itemView.setOnClickListener {
-                        if (adapterPosition != RecyclerView.NO_POSITION) {
-                            listener.onClick(adapterPosition, getItem(adapterPosition))
-                        }
+                txtHijaiyah.text = model.title
+                imgHijaiyah.setImageResource(model.img)
+                itemView.setOnClickListener {
+                    if (adapterPosition != RecyclerView.NO_POSITION) {
+                        listener.onClick(adapterPosition, getItem(adapterPosition))
                     }
-                } else {
-                    txtHijaiyah.text = ""
-                    imgHijaiyah.setImageResource(R.color.teal_700)
-                    linearItemHijaiyah.setBackgroundColor(Color.parseColor("#FF018786"))
                 }
             }
         }

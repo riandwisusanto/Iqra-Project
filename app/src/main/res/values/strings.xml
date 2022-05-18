@@ -10,7 +10,7 @@
     <string name="belajar_mengaji">Belajar Mengaji</string>
     <string name="subtext">Aplikasi yang dapat digunakan untuk memudahkan pengguna dalam belajar membaca Iqra </string>
     <string name="huruf_hijaiyah">Huruf Hijaiyah</string>
-    <string name="mengenal_30_huruf_hijaiyah">Mengenal 30 Huruf Hijaiyah</string>
+    <string name="mengenal_29_huruf_hijaiyah">Mengenal 29 Huruf Hijaiyah</string>
     <string name="iqro">IQRO</string>
     <string name="jilid_1">JILID 1</string>
     <string name="jilid_2">JILID 2</string>
@@ -20,7 +20,6 @@
     <string name="jilid_6">JILID 6</string>
     <string name="tutup">Tutup</string>
     <string name="lanjut">Lanjut</string>
-    <string name="spotlight_main_test">Klik tombol test untuk ujian mendengarkan dan mengeja huruf Hijaiyah.</string>
     <string name="spotlight_main_hijaiyah">Klik tombol hijaiyah untuk belajar huruf Hijaiyah.</string>
     <string name="spotlight_main_testListening">Klik tombol test listening untuk ujian mendengarkan huruf hijaiyah.</string>
     <string name="spotlight_main_testSpeaking">Klik tombol test speaking untuk ujian mengeja huruf Hijaiyah.</string>
@@ -28,32 +27,40 @@
     <string name="spotlight_main_iqro2">Klik tombol iqra 2 untuk belajar Iqra 2.\nSesuaikan dengan jilid yang ingin anda Pelajari.</string>
     <string name="spotlight_hijaiyah">Belajar huruf hijaiyah.</string>
     <string name="spotlight_hijaiyah_suara">Klik salah satu huruf hijaiyah untuk mengetahui cara pelafalannya.</string>
-    <string name="training_suara">Training Suara</string>
+    <string name="input_suara">Input Suara</string>
+    <string name="input_data_suara">Input Data Suara</string>
     <string name="melatih_untuk_pengenalan_suara">Melatih untuk pengenalan suara</string>
     <string name="pilih_huruf">Pilih Huruf</string>
     <string name="training">Training</string>
     <string name="testing">Testing</string>
-    <string name="training_huruf_hijaiyah">Training Huruf Hijaiyah</string>
+    <string name="listrecord">List Record</string>
     <string name="tap_untuk_berbicara">Tap untuk berbicara </string>
     <string name="tap_untuk_bicara">Tekan Micnya\nUntuk memulai recording. </string>
+    <string name="tes_akurasi">Hasil akurasi train = ..... %. </string>
     <string name="mendengarkan">Mendengarkan…</string>
     <string name="_1_15">%1$s/15</string>
     <string name="skip">SKIP</string>
     <string name="test_mendengarkan">Test Mendengar</string>
     <string name="test_mendengarkan_huruf_hijaiyah">Test Mendengar Huruf Hijaiyah</string>
-    <string name="test_pengucapan_huruf_hijaiyah">Test Berbicara Huruf Hijaiyah</string>
+    <string name="latihan_huruf_hijaiyah">Latihan Huruf Hijaiyah</string>
+    <string name="test_mengeja_huruf_hijaiyah">Test Mengeja Huruf Hijaiyah</string>
     <string name="nilai_kamu">Nilai Kamu</string>
     <string name="_0">0 %</string>
     <string name="jawaban_benar">Jawaban Benar : %1$s</string>
     <string name="jawaban_salah">Jawaban Salah : %1$s</string>
     <string name="kembali_ke_menu_utama">Kembali ke Menu Utama</string>
-    <string name="test_pengucapan">Test Berbicara</string>
-    <string name="pilih_jawaban_yang_yang_benar_dari_4_pilihan_ini">Pilih jawaban yang yang benar dari 4 pilihan ini.</string>
+    <string name="test_mengeja">Test Mengeja</string>
+    <string name="lanjut_test_mengeja">Lanjut Test Mengeja</string>
+    <string name="ulang_test_mengeja">Ulangi Test Mengeja</string>
+    <string name="ulang_test_mendengar">Ulangi Test Mendengar</string>
+    <string name="pilih_jawaban_yang_yang_benar_dari_4_pilihan_ini">Pilih jawaban yang benar dari 4 pilihan ini.</string>
     <string name="tekan_tombol_play_untuk_memainkan_suara">Tekan tombol play untuk memainkan suara.</string>
     <string name="tekan_tombol_skip_jika_anda_ingin_melanjutkan_pertanyaan_lain">Tekan tombol skip jika anda ingin melanjutkan pertanyaan lain.</string>
     <string name="tekan_tombol_untuk_membuka_microphone_njika_microphone_belum_tertutup_silahkan_tekan_tombol_microphone_lagi_untuk_menutup">Tekan tombol untuk membuka microphone.\nJika microphone belum tertutup, silahkan tekan tombol microphone lagi untuk menutup.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="listrecord">List Record</string>
-    <string name="test">Test Ujian</string>
+    <string name="latihan">Latihan</string>
+    <string name="spotlight_main_test">Klik tombol latihan untuk ujian mendengarkan dan mengeja huruf Hijaiyah.</string>
+
+    <string name="belajar_huruf">Belajar Huruf Hijaiyah</string>
 </resources>

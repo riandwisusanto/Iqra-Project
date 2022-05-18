@@ -5,9 +5,7 @@
     android:background="@color/backgroundHijaiyah"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="@dimen/space8"
-    android:id="@+id/linearItemHijaiyah"
-    >
+    android:padding="@dimen/space8">
 
     <ImageView
         android:id="@+id/imgHijaiyah"

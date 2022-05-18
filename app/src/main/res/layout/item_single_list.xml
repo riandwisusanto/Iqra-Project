@@ -1,59 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/backgroundHijaiyah"
-    android:padding="@dimen/space1"
     android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/listAudio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_main_menu"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:background="@drawable/bg_main_menu"
-        android:layout_margin="@dimen/space2">
+        android:padding="@dimen/space8">
 
         <ImageView
-            android:id="@+id/list_image_view"
-            android:layout_width="@dimen/size50"
-            android:layout_height="@dimen/size50"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:src="@drawable/list_play_btn"/>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/btnAudio"
+            android:layout_width="@dimen/size80"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/icon"
+            android:src="@drawable/list_play_btn"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space16"
+            android:orientation="vertical"
+            android:padding="@dimen/space8">
 
             <TextView
                 android:id="@+id/list_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="0dp"
                 android:text="Filename"
-                android:textColor="@android:color/black"
-                android:textSize="15sp"/>
+                android:textSize="@dimen/font15"
+                android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/list_date"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="0dp"
-                android:layout_marginTop="@dimen/size4"
                 android:text="Text_View"
                 android:textColor="@android:color/black"
-                android:textSize="13sp"/>
-
+                android:textSize="@dimen/font14"/>
         </LinearLayout>
-
     </LinearLayout>
 
 

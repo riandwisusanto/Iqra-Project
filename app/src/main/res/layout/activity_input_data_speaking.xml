@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    tools:context=".mvvm.views.activities.InputDataSpeakingActivity">
+
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/iqra_toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/space16">
+
+        <ImageView
+            android:layout_width="323dp"
+            android:layout_height="202dp"
+            android:padding="@dimen/space2"
+            android:popupElevation="3dp"
+            android:src="@drawable/home_illustration"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/toolbar" />
+
+        <Spinner
+            android:id="@+id/spinnerHijaiyah"
+            style="@style/Widget.AppCompat.Spinner"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/dropdownListPreferredItemHeight"
+            android:background="@drawable/bg_spinner"
+            android:dropDownWidth="match_parent"
+            android:dropDownVerticalOffset="?attr/dropdownListPreferredItemHeight"
+            android:padding="8dp"
+            android:popupElevation="3dp"
+            tools:ignore="PrivateResource"
+            android:layout_marginTop="@dimen/space32"/>
+
+        <TextView
+            android:id="@+id/txtRecord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tap_untuk_bicara"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"
+            android:lineHeight="@dimen/space20"
+            android:textSize="@dimen/space16"
+            android:layout_marginStart="@dimen/space30"
+            android:layout_marginEnd="@dimen/space30"
+            android:layout_marginTop="@dimen/space20"/>
+
+        <LinearLayout
+            android:layout_width="286dp"
+            android:layout_height="197dp"
+            android:layout_marginTop="@dimen/space20"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/imgMic"
+                android:layout_width="136dp"
+                android:layout_height="130dp"
+                android:layout_marginStart="@dimen/space60"
+                android:layout_marginEnd="@dimen/space0"
+                android:src="@drawable/record_btn_recording" />
+
+            <ImageView
+                android:id="@+id/recordList"
+                android:layout_width="57dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="@dimen/space0"
+                android:layout_marginEnd="@dimen/space20"
+                android:padding="@dimen/space18"
+                android:src="@drawable/recorder_list_btn" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

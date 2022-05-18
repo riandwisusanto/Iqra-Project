@@ -8,14 +8,9 @@ import retrofit2.http.POST
 
 
 interface PostService {
-
-//    @GET("posts")
-//    fun getPosts(): Call<List<PostModel>>
-
     @POST("train")
     open fun uploadWav(
         @Header("Content-Type") contentType: String?,
         @Body body: MultipartBody?
     ): Call<PostModel>
-
 }

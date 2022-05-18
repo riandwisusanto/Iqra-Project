@@ -386,17 +386,18 @@ class TestListeningActivity : AppCompatActivity() {
         editor.apply()
 
         if((score.toDouble() / 15.0 * 100.0) >= 80){
-            popupBinding.btnTurn.text = "Lanjut Test Berbicara"
+            popupBinding.btnTurn.visibility=View.VISIBLE
+            popupBinding.btnTurn.text = resources.getString(R.string.lanjut_test_mengeja)
             popupBinding.btnTurn.setOnClickListener {
                 startActivity(
                     Intent(this, TestSpeakingActivity::class.java)
                 )
             }
         } else{
-            popupBinding.btnTurn.text = "Ulangi Test Mendengar"
+            popupBinding.btnTurn.visibility=View.VISIBLE
+            popupBinding.btnTurn.text = resources.getString(R.string.ulang_test_mendengar)
             popupBinding.btnTurn.setOnClickListener {
-                finish();
-                startActivity(getIntent());
+                finish()
             }
         }
 

@@ -29,7 +29,7 @@ import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityTestSpeakingBinding
 import co.bayueka.iqra.databinding.PopupResultTestBinding
 import co.bayueka.iqra.mvvm.models.HijaiyahModel
-import co.bayueka.iqra.mvvm.models.TrainingHijaiyahModel
+import co.bayueka.iqra.mvvm.models.TestingModel
 import co.bayueka.iqra.mvvm.viewmodels.HijaiyahViewModel
 import co.bayueka.iqra.utils.SessionManager
 import com.google.firebase.database.DataSnapshot
@@ -90,7 +90,7 @@ class TestSpeakingActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == TrainingActivity.RECORD_AUDIO_REQUEST_CODE) {
+        if (requestCode == InputDataSpeakingActivity.RECORD_AUDIO_REQUEST_CODE) {
             if (grantResults.size > 0) {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this@TestSpeakingActivity, "Permission Didapatkan", Toast.LENGTH_SHORT).show()
@@ -105,7 +105,7 @@ class TestSpeakingActivity : AppCompatActivity() {
 
     private fun initComponents() {
         binding.apply {
-            toolbar.txtTitle.text = root.context.resources.getString(R.string.test_pengucapan_huruf_hijaiyah)
+            toolbar.txtTitle.text = root.context.resources.getString(R.string.test_mengeja_huruf_hijaiyah)
         }
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
     }
@@ -127,7 +127,7 @@ class TestSpeakingActivity : AppCompatActivity() {
                     hijaiyahId.add("0")
                     hijaiyahHuruf.add(resources.getString(R.string.pilih_huruf))
                     snapshot.children.forEach {
-                        val hijaiyah = it.getValue(TrainingActivity.Hijaiyah::class.java)
+                        val hijaiyah = it.getValue(InputDataSpeakingActivity.Hijaiyah::class.java)
                         hijaiyah?.let {
                             it.id?.let {
                                 hijaiyahId.add(it)
@@ -268,7 +268,7 @@ class TestSpeakingActivity : AppCompatActivity() {
                     Log.d(TAG, "subscribeListeners: ${it.key}")
                     it.key?.let { key ->
                         myRef.child("training").child(key).get().addOnSuccessListener { dataSnapshotSample ->
-                            val sample = dataSnapshotSample.getValue(TrainingHijaiyahModel::class.java)
+                            val sample = dataSnapshotSample.getValue(TestingModel::class.java)
                             sample?.let { trainingHijaiyahSample ->
                                 hideLoading()
                                 binding.checkAnswer.visibility = View.VISIBLE
@@ -302,7 +302,7 @@ class TestSpeakingActivity : AppCompatActivity() {
 
                 checkAnswer.visibility = View.GONE
 
-                numberQuestion = (0 until hijaiyahDataQuestion.size).random()
+                numberQuestion = getRandomNumber()
                 answerModel = hijaiyahDataQuestion[numberQuestion]
 
                 imgAnswer.setImageResource(answerModel!!.img)
@@ -313,12 +313,15 @@ class TestSpeakingActivity : AppCompatActivity() {
             }
         }
     }
+    private fun getRandomNumber(): Int {
+        return (0 until hijaiyahDataQuestion.size).random()
+    }
 
     private fun checkPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO),
-                    TrainingActivity.RECORD_AUDIO_REQUEST_CODE
+                    InputDataSpeakingActivity.RECORD_AUDIO_REQUEST_CODE
                 )
             }
         }
@@ -332,20 +335,27 @@ class TestSpeakingActivity : AppCompatActivity() {
         dialog.setCancelable(false)
         dialog.show()
 
-        popupBinding.txtTitle.text = resources.getString(R.string.test_pengucapan_huruf_hijaiyah)
+        popupBinding.txtTitle.text = resources.getString(R.string.test_mengeja_huruf_hijaiyah)
         val pecentage = (score.toDouble() / 15.0 * 100.0).roundToInt().toString() + "%"
         popupBinding.txtPercentage.text = pecentage
         popupBinding.txtCorrectAnswer.text = String.format(resources.getString(R.string.jawaban_benar), score)
         popupBinding.txtIncorrectAnswer.text = String.format(resources.getString(R.string.jawaban_salah), (15 - score).toString())
 
+        //        save score in sp
         val editor = sharedPreferences.edit()
         editor.putInt("score_speaking", (score.toDouble() / 15.0 * 100.0).roundToInt())
         editor.apply()
 
-        popupBinding.btnTurn.text = "Ulangi Test Berbicara"
-        popupBinding.btnTurn.setOnClickListener {
-            finish();
-            startActivity(getIntent());
+        if((score.toDouble() / 15.0 * 100.0) >= 90){
+            popupBinding.btnTurn.visibility=View.GONE
+            Toast.makeText(this@TestSpeakingActivity, "Selamat Anda Sudah LULUS Semua Latihan!!!!", Toast.LENGTH_LONG).show()
+        } else{
+            popupBinding.btnTurn.visibility=View.VISIBLE
+            popupBinding.btnTurn.text = resources.getString(R.string.ulang_test_mengeja)
+            popupBinding.btnTurn.setOnClickListener {
+                startActivity(Intent(this, TestSpeakingActivity::class.java)
+                )
+            }
         }
 
         popupBinding.btnBack.setOnClickListener {

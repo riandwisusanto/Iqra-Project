@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:orientation="vertical"
-    tools:context=".mvvm.views.activities.TrainingActivity">
+    tools:context=".mvvm.views.activities.InputDataSpeakingActivity">
 
 
     <include
@@ -33,6 +33,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="@id/toolbar" />
 
+        <ImageView
+            android:id="@+id/hurufSelect"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:padding="@dimen/space2"
+            android:popupElevation="3dp"
+            android:src="@drawable/alif"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            android:layout_marginTop="@dimen/space5"/>
+
+
         <Spinner
             android:id="@+id/spinnerHijaiyah"
             style="@style/Widget.AppCompat.Spinner"
@@ -44,7 +57,7 @@
             android:padding="8dp"
             android:popupElevation="3dp"
             tools:ignore="PrivateResource"
-            android:layout_marginTop="@dimen/space32"/>
+            android:layout_marginTop="@dimen/space10"/>
 
         <TextView
             android:id="@+id/txtRecord"
@@ -57,30 +70,28 @@
             android:textSize="@dimen/space16"
             android:layout_marginStart="@dimen/space30"
             android:layout_marginEnd="@dimen/space30"
-            android:layout_marginTop="@dimen/space20"/>
+            android:layout_marginTop="@dimen/space10"/>
 
         <LinearLayout
             android:layout_width="286dp"
             android:layout_height="197dp"
-            android:layout_marginTop="@dimen/space20"
+            android:layout_marginTop="@dimen/space10"
             android:gravity="center">
 
             <ImageView
                 android:id="@+id/imgMic"
                 android:layout_width="136dp"
                 android:layout_height="130dp"
-                android:layout_marginStart="@dimen/space60"
-                android:layout_marginEnd="@dimen/space0"
                 android:src="@drawable/record_btn_recording" />
 
-            <ImageView
-                android:id="@+id/recordList"
-                android:layout_width="57dp"
-                android:layout_height="60dp"
-                android:layout_marginStart="@dimen/space0"
-                android:layout_marginEnd="@dimen/space20"
-                android:padding="@dimen/space18"
-                android:src="@drawable/recorder_list_btn" />
+<!--            <ImageView-->
+<!--                android:id="@+id/recordList"-->
+<!--                android:layout_width="57dp"-->
+<!--                android:layout_height="60dp"-->
+<!--                android:layout_marginStart="@dimen/space0"-->
+<!--                android:layout_marginEnd="@dimen/space20"-->
+<!--                android:padding="@dimen/space18"-->
+<!--                android:src="@drawable/recorder_list_btn" />-->
         </LinearLayout>
 
     </LinearLayout>

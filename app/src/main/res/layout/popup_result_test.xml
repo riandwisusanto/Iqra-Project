@@ -66,14 +66,15 @@
             android:layout_marginTop="@dimen/space40"
             android:background="@drawable/bg_button_white"
             android:text=""
-            android:textColor="@color/teal_700" />
+            android:textColor="@color/teal_700"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/btnBack"
             android:layout_width="match_parent"
             android:layout_height="@dimen/size30"
             android:layout_marginHorizontal="@dimen/space32"
-            android:layout_marginTop="@dimen/space5"
+            android:layout_marginTop="@dimen/space15"
             android:background="@drawable/bg_button_white"
             android:text="@string/kembali_ke_menu_utama"
             android:textColor="@color/teal_700" />

@@ -23,13 +23,13 @@ class TestActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("Score", Context.MODE_PRIVATE)
 
-        binding.toolbar.txtTitle.text = resources.getString(R.string.test)
+        binding.toolbar.txtTitle.text = resources.getString(R.string.latihan)
         binding.apply {
             val scorelistening = sharedPreferences.getInt("score_listening", 0)
             val scoreSpeaking  = sharedPreferences.getInt("score_speaking", 0)
 
             textListening.text = resources.getString(R.string.test_mendengarkan) + " (" + scorelistening + ")"
-            textSpeaking.text   = resources.getString(R.string.test_pengucapan) + " (" + scoreSpeaking + ")"
+            textSpeaking.text   = resources.getString(R.string.test_mengeja) + " (" + scoreSpeaking + ")"
 
             linearTestListening.setOnClickListener {
                 startActivity(
@@ -59,8 +59,8 @@ class TestActivity : AppCompatActivity() {
             val scorelistening = sharedPreferences.getInt("score_listening", 0)
             val scoreSpeaking  = sharedPreferences.getInt("score_speaking", 0)
 
-            textListening.text = resources.getString(R.string.test_mendengarkan) + " (" + scorelistening + ")"
-            textSpeaking.text   = resources.getString(R.string.test_pengucapan) + " (" + scoreSpeaking + ")"
+            textListening.text = resources.getString(R.string.test_mendengarkan) + " (" + "Nilai anda "+ scorelistening + ")"
+            textSpeaking.text   = resources.getString(R.string.test_mengeja) + " (" + "Nilai anda " + scoreSpeaking + ")"
         }
 
     }
