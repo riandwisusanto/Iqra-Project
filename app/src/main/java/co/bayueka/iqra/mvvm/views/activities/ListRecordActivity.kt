@@ -15,7 +15,6 @@ import co.bayueka.iqra.databinding.ActivityListRecordBinding
 import co.bayueka.iqra.mvvm.models.SpeakModel
 import co.bayueka.iqra.mvvm.views.adapters.RecordAdapter
 import co.bayueka.iqra.retrofit.DataRepository
-import co.bayueka.iqra.retrofit.PostModel
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -165,18 +164,18 @@ class ListRecordActivity : AppCompatActivity() {
         postServices.uploadWav(
             "multipart/form-data; boundary=" + body.boundary(),
             body
-        ).enqueue(object : Callback<PostModel> {
-            override fun onResponse(call: Call<PostModel>, response: retrofit2.Response<PostModel>) {
+        ).enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: retrofit2.Response<String>) {
                 if(response.isSuccessful){
                     trainBtn.text = "START TRAINING"
                     trainBtn.isEnabled = true
                     val data = response.body()
-                    txtAkurasi.text="Hasil akurasi train = ${data?.output} %"
-                    Toast.makeText(this@ListRecordActivity, "Hasil akurasi train = ${data?.output} %", Toast.LENGTH_LONG).show()
+                    txtAkurasi.text="Hasil akurasi train = ${data} %"
+                    Toast.makeText(this@ListRecordActivity, "Hasil akurasi train = ${data} %", Toast.LENGTH_LONG).show()
                 }
             }
 
-            override fun onFailure(call: Call<PostModel>, t: Throwable) {
+            override fun onFailure(call: Call<String>, t: Throwable) {
                 trainBtn.text = "START TRAINING"
                 trainBtn.isEnabled = true
                 Toast.makeText(this@ListRecordActivity, "errornya ${t.message}", Toast.LENGTH_SHORT).show()

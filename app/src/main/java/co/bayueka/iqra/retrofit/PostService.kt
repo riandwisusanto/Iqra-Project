@@ -12,5 +12,5 @@ interface PostService {
     open fun uploadWav(
         @Header("Content-Type") contentType: String?,
         @Body body: MultipartBody?
-    ): Call<PostModel>
+    ): Call<String>
 }

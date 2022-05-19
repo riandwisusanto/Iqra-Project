@@ -24,19 +24,9 @@
         android:padding="@dimen/space16">
 
         <ImageView
+            android:id="@+id/hurufSelect"
             android:layout_width="323dp"
             android:layout_height="202dp"
-            android:padding="@dimen/space2"
-            android:popupElevation="3dp"
-            android:src="@drawable/home_illustration"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="@id/toolbar" />
-
-        <ImageView
-            android:id="@+id/hurufSelect"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
             android:padding="@dimen/space2"
             android:popupElevation="3dp"
             android:src="@drawable/alif"

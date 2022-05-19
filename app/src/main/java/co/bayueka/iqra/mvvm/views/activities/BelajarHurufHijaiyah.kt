@@ -5,12 +5,8 @@ import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.AudioFormat
-import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.os.Build
-import android.os.Bundle
-import android.os.Environment
+import android.os.*
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -25,16 +21,20 @@ import androidx.core.content.ContextCompat
 import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityBelajarHurufBinding
 import co.bayueka.iqra.mvvm.views.activities.InputDataSpeakingActivity.Companion.RECORD_AUDIO_REQUEST_CODE
-import com.chaquo.python.Python
-import com.chaquo.python.android.AndroidPlatform
+import co.bayueka.iqra.retrofit.DataRepository
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import com.arthenica.mobileffmpeg.FFmpeg;
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
 import java.io.*
 import java.util.*
+
 
 private const val TAG = "TrainingActivity"
 
@@ -56,6 +56,7 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
     private val myRef = database.reference
 
     private var lastNumber = 0
+    private var baseUrl = "http://11.11.11.248:5000/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,15 +80,6 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
         binding.spinnerHijaiyah.adapter = hijaiyahAdapter
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-
-        if(!Python.isStarted())
-            Python.start(AndroidPlatform(this))
-
-        val py = Python.getInstance()
-        val pyObj = py.getModule("python")
-
-        val pyCall = pyObj.callAttr("train", File( Environment.getExternalStorageDirectory(), "audio.wav").absolutePath)
-        Log.d("train", pyCall.toString())
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -305,7 +297,7 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
             mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            val fileName = File( Environment.getExternalStorageDirectory(), "audio_temp.mp3")
+            val fileName = File( Environment.getExternalStorageDirectory(), "audio.3gp")
             mediaRecorder?.setOutputFile(fileName.absolutePath)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
@@ -315,6 +307,7 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
     }
 
     private fun stopRecorder() {
+        showLoading()
         if(mediaRecorder != null){
             try {
                 mediaRecorder?.stop()
@@ -325,14 +318,67 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
             }
         }
 
-        FFmpeg.execute("-i "+ File( Environment.getExternalStorageDirectory(), "audio_temp.mp3").absolutePath + " " + File( Environment.getExternalStorageDirectory(), "audio.wav").absolutePath)
-        if(!Python.isStarted())
-            Python.start(AndroidPlatform(this))
+        val returnIntent = Intent()
+        returnIntent.putExtra("result", File( Environment.getExternalStorageDirectory(), "audio.3gp").path)
+        setResult(RESULT_OK, returnIntent)
+        finish()
+    }
 
-        val py = Python.getInstance()
-        val pyObj = py.getModule("python")
+    private fun toTrainPython(){
+        val multipartBody = MultipartBody.Builder()
+        val file = File( Environment.getExternalStorageDirectory(), "audio.3gp").path
+        val fileBody = RequestBody.create(MediaType.parse("3gp"), file)
 
-        val pyCall = pyObj.callAttr("train", File( Environment.getExternalStorageDirectory(), "audio.wav").absolutePath)
-        Log.d("train", pyCall.toString())
+        multipartBody.addFormDataPart("sound", "audio.3gp", fileBody)
+
+        val postServices = DataRepository.create(baseUrl)
+        val body = multipartBody.build()
+        postServices.uploadWav(
+            "multipart/form-data; boundary=" + body.boundary(),
+            body
+        ).enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: retrofit2.Response<String>) {
+                if(response.isSuccessful){
+                    hideLoading()
+                    val data = response.body()
+                    Toast.makeText(this@BelajarHurufHijaiyah, "Hasil = ${data}", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                hideLoading()
+                Toast.makeText(this@BelajarHurufHijaiyah, "errornya ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("retrofit", "errornya ${t.message}")
+            }
+
+        })
+    }
+
+    fun showLoading() {
+        if (loading == null) {
+            loading = ProgressDialog.show(this, null, "Harap Tunggu ...", true, false)
+        }
+    }
+
+    fun hideLoading() {
+        if (loading != null) {
+            loading!!.dismiss()
+            loading = null
+        }
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == RESULT_OK) {
+
+            // Great! User has recorded and saved the audio file
+            if (data != null) {
+                val savedUri: String? = data.getStringExtra("result")
+                Log.d("debug", "Record Path:$savedUri")
+            }
+        }
+        else if (resultCode == RESULT_CANCELED) {
+            // Oops! User has canceled the recording
+        }
     }
 }

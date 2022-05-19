@@ -5,8 +5,6 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'com.google.gms.google-services'
-
-    id 'com.chaquo.python'
 }
 
 android {
@@ -21,27 +19,6 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        sourceSets {
-            main {
-                python.srcDir "src/main/python"
-            }
-        }
-
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
-        }
-
-        python {
-            buildPython "C:/Users/Rian03/AppData/Local/Programs/Python/Python38-32/python.exe"
-
-            pip {
-                install "pydub"
-                install "scipy"
-                install "joblib"
-                install "numpy"
-            }
-        }
     }
 
     buildTypes {
@@ -111,11 +88,6 @@ dependencies {
     // Spotlight
     implementation "com.github.takusemba:spotlight:$spotlight_version"
 
-    // Firebase
-//    implementation platform("com.google.firebase:firebase-bom:$firebase_bom_version")
-//    implementation 'com.google.firebase:firebase-analytics-ktx'
-//    implementation 'com.google.firebase:firebase-database-ktx'
-
     //Android Jetpak Navigation
     def nav_version ="2.2.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
@@ -124,7 +96,5 @@ dependencies {
     //Implemntasi retrofit
     implementation "com.squareup.retrofit2:retrofit:2.4.0"
     implementation "com.squareup.retrofit2:converter-gson:2.4.0"
-
-    implementation 'com.arthenica:mobile-ffmpeg-full:4.4'
 
 }

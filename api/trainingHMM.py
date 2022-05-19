@@ -1,95 +1,17 @@
-from scipy.io import wavfile
+from sys import maxsize
+from flask import Flask
+from flask import request
+from flask import jsonify
+
+import os
 import joblib
-import numpy as np
 import scipy
+import numpy as np
 from numpy.lib.stride_tricks import as_strided
 import scipy.stats as st
-from os.path import dirname, join
-            
-def stft(x, fftsize=60, overlap_pct=0.5): #asli 64
-    #Modified from http://stackoverflow.com/questions/2459295/stft-and-istft-in-python
-    hop = int(fftsize * (1 - overlap_pct))
-    w = scipy.hanning(fftsize + 1)[:-1]    
-    # penjelasan hanning di buku
-    
-    raw = np.array([np.fft.rfft(w * x[i:i + fftsize]) for i in range(0, len(x) - fftsize, hop)])
-    return raw[:, :(fftsize // 2)]
+from scipy.io import wavfile
 
-def peakfind(x, n_peaks, l_size=3, r_size=3, c_size=3, f=np.mean):
-    win_size = l_size + r_size + c_size
-    shape = x.shape[:-1] + (x.shape[-1] - win_size + 1, win_size)
-    strides = x.strides + (x.strides[-1],)
-    xs = as_strided(x, shape=shape, strides=strides)
-    def is_peak(x):
-        centered = (np.argmax(x) == l_size + int(c_size/2))
-        l = x[:l_size]
-        c = x[l_size:l_size + c_size]
-        r = x[-r_size:]
-        passes = np.max(c) > np.max([f(l), f(r)])
-        if centered and passes:
-            return np.max(c)
-        else:
-            return -1
-        
-    r = np.apply_along_axis(is_peak, 1, xs)
-    top = np.argsort(r, None)[::-1]
-    heights = r[top[:n_peaks]]
-    #Add l_size and half - 1 of center size to get to actual peak location
-    top[top > -1] = top[top > -1] + l_size + int(c_size / 2.)
-    return heights, top[:n_peaks]
-
-def AmbilFitur(d):
-    maxsize = -1
-    
-    fftsize0=60     
-        
-    overlap0=0.5
-  
-    #1. SAMAKAN UKURAN
-#     _ , d = wavfile.read(nama_file)
-    s = np.zeros(32000) #32000 data list penampung sementara
-   
-    s[:d.shape[0]] = d
-    s = s[:maxsize]# agar panjang data sama
-    
-    #2. STFT
-    d = np.abs(stft(s,fftsize0,overlap0)) #60  0.5
-#     print('d.shape',d.shape)    
-    
-    #3. FITUR EKSTRAKSI, 4 PUNCAK TIAP INTEVAL
-    n_dim = 4  # ambil 4 PUNCAK TIAP WINDOWS INTERVAL, =>  n_peaks  
-
-    obs = np.zeros((n_dim, d.shape[0]))
-    #print('awal',obs.shape)
-
-    for r in range(d.shape[0]):
-        _, t = peakfind(d[r, :], n_peaks = n_dim)
-        obs[:, r] = t.copy()
-    
-    #4. NORMALISASI
-    obs = obs/obs.sum(axis=0)
-    return obs
-
-def train(inp):
-    ms_load = joblib.load(join(dirname(__file__), 'save_ms.pkl'))
-    spoken_load = joblib.load(join(dirname(__file__), 'save_spoken.pkl'))
-
-    return ms_load
-
-    # LOAD 
-    _ , d = wavfile.read(inp)
-
-    #AMBILFITUR
-    x = AmbilFitur(d)
-
-    #TESTING
-    ps = [m.transform(x) for m in ms_load]  # data training ms
-    #print(ps)
-    res = np.vstack(ps)
-
-    #HASIL TESTING
-    pos=np.argmax(res, axis=0)[0]
-    return spoken_load[pos]
+app = Flask(__name__)
 
 class gmmhmm:
     #This class converted with modifications from https://code.google.com/p/hmm-speech-recognition/source/browse/Word.m
@@ -253,34 +175,99 @@ class gmmhmm:
                 out[n] = log_likelihood
             return out
 
-if __name__ == "__main__":
-    rstate = np.random.RandomState(0)
-    t1 = np.ones((4, 40)) + .001 * rstate.rand(4, 40)
-    t1 /= t1.sum(axis=0)
-    t2 = rstate.rand(*t1.shape)
-    t2 /= t2.sum(axis=0)
+def AmbilFitur(d):
+  
+    n_dim=4
+    fftsize0=60
+    overlap0=0.5
+    maxsize=-1
+    #1. SAMAKAN UKURAN
+    s = np.zeros(32000) #32000 data list penampung sementara
+   
+    s[:d.shape[0]] = d
+    s = s[:maxsize]# agar panjang data sama
     
-    m1 = gmmhmm(2)
-    m1.fit(t1)
-    m2 = gmmhmm(2)
-    m2.fit(t2)
+    #2. STFT
+    d = np.abs(stft(s,fftsize0,overlap0)) #60  0.5
+#     print('d.shape',d.shape)    
     
-#     m1t1 = m1.transform(t1)
-#     m2t1 = m2.transform(t1)
-#     print("Likelihoods for test set 1")
-#     print("M1:", m1t1)
-#     print("M2:", m2t1)
-#     print("Prediction for test set 1")
-#     print("Model", np.argmax([m1t1, m2t1]) + 1)
-#     print()
-    
-#     m1t2 = m1.transform(t2)
-#     m2t2 = m2.transform(t2)
-#     print("Likelihoods for test set 2")
-#     print("M1:", m1t2)
-#     print("M2:", m2t2)
-#     print("Prediction for test set 2")
-#     print("Model", np.argmax([m1t2, m2t2]) + 1)
+    #3. FITUR EKSTRAKSI, 4 PUNCAK TIAP INTEVAL
 
-if __name__ == '__main__':
-    print(train("result.wav"))
+    obs = np.zeros((n_dim, d.shape[0]))
+    #print('awal',obs.shape)
+
+    for r in range(d.shape[0]):
+        _, t = peakfind(d[r, :], n_peaks = n_dim)
+        obs[:, r] = t.copy()
+    
+    #4. NORMALISASI
+    obs = obs/obs.sum(axis=0)
+    return obs
+
+def stft(x, fftsize=60, overlap_pct=0.5):
+    hop = int(fftsize * (1 - overlap_pct))
+    w = scipy.hanning(fftsize + 1)[:-1]    
+    # penjelasan hanning di buku
+    
+    raw = np.array([np.fft.rfft(w * x[i:i + fftsize]) for i in range(0, len(x) - fftsize, hop)])
+    return raw[:, :(fftsize // 2)]
+
+def peakfind(x, n_peaks, l_size=3, r_size=3, c_size=3, f=np.mean):
+    win_size = l_size + r_size + c_size
+    shape = x.shape[:-1] + (x.shape[-1] - win_size + 1, win_size)
+    strides = x.strides + (x.strides[-1],)
+    xs = as_strided(x, shape=shape, strides=strides)
+    def is_peak(x):
+        centered = (np.argmax(x) == l_size + int(c_size/2))
+        l = x[:l_size]
+        c = x[l_size:l_size + c_size]
+        r = x[-r_size:]
+        passes = np.max(c) > np.max([f(l), f(r)])
+        if centered and passes:
+            return np.max(c)
+        else:
+            return -1
+        
+    r = np.apply_along_axis(is_peak, 1, xs)
+    top = np.argsort(r, None)[::-1]
+    heights = r[top[:n_peaks]]
+    #Add l_size and half - 1 of center size to get to actual peak location
+    top[top > -1] = top[top > -1] + l_size + int(c_size / 2.)
+    return heights, top[:n_peaks]
+
+ms_load = joblib.load('save_ms_2.pkl')
+spoken_load = joblib.load('save_spoken_2.pkl')
+
+def train(audio):
+    #AMBILFITUR
+    x = AmbilFitur(audio)
+    #TESTING
+    ps = [m.transform(x) for m in ms_load]  # data training ms
+    #print(ps)
+    res = np.vstack(ps)
+
+    #HASIL TESTING
+    pos=np.argmax(res, axis=0)[0]
+
+    # os.remove("audio.wav")
+    return spoken_load[pos]
+
+@app.route('/train', methods=['POST'])
+def loadAudio():
+    audio    = request.files["sound"]
+    filename = audio.filename
+
+    save_path = os.path.join(filename)
+    audio.save(save_path)
+
+    to_url   = "audio.wav"
+    os.system('ffmpeg -i '+filename+' '+to_url)
+    # os.remove(filename)
+
+    return jsonify("p")
+
+    _ , d = wavfile.read("audio.wav")
+
+    return jsonify(train(d))
+
+app.run(debug=True, host='0.0.0.0', port=5000)

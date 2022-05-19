@@ -11,8 +11,6 @@ import android.widget.TextView
 import co.bayueka.iqra.R
 import co.bayueka.iqra.databinding.ActivityMainBinding
 import co.bayueka.iqra.utils.SessionManager
-import com.chaquo.python.Python
-import com.chaquo.python.android.AndroidPlatform
 import com.takusemba.spotlight.OnSpotlightListener
 import com.takusemba.spotlight.OnTargetListener
 import com.takusemba.spotlight.Spotlight
