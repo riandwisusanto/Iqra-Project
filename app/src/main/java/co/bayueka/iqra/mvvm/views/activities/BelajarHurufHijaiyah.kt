@@ -3,10 +3,13 @@ package co.bayueka.iqra.mvvm.views.activities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.media.MediaRecorder
+import android.net.Uri
 import android.os.*
+import android.provider.MediaStore
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -56,7 +59,8 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
     private val myRef = database.reference
 
     private var lastNumber = 0
-    private var baseUrl = "http://11.11.11.248:5000/"
+    var audioUri: Uri? = null
+    private var baseUrl = "http://11.11.11.251:5000/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -287,6 +291,10 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
                 }
             }
         }
+
+        binding.imgRestart.setOnClickListener {
+            toTrainPython()
+        }
     }
 
     @SuppressLint("NewApi")
@@ -296,9 +304,12 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
 
             mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                mediaRecorder!!.setOutputFile(getFilePath())
+            } else {
+                mediaRecorder!!.setOutputFile(getFileDescriptor())
+            }
             mediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            val fileName = File( Environment.getExternalStorageDirectory(), "audio.3gp")
-            mediaRecorder?.setOutputFile(fileName.absolutePath)
             mediaRecorder?.prepare()
             mediaRecorder?.start()
         } catch (e: IllegalStateException) {
@@ -307,29 +318,20 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
     }
 
     private fun stopRecorder() {
-        showLoading()
-        if(mediaRecorder != null){
-            try {
-                mediaRecorder?.stop()
-                mediaRecorder?.release()
-                mediaRecorder = null
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
-            }
+        if (mediaRecorder != null) {
+            mediaRecorder?.stop()
+            mediaRecorder?.release()
+            mediaRecorder = null
         }
-
-        val returnIntent = Intent()
-        returnIntent.putExtra("result", File( Environment.getExternalStorageDirectory(), "audio.3gp").path)
-        setResult(RESULT_OK, returnIntent)
-        finish()
     }
 
     private fun toTrainPython(){
+        showLoading()
         val multipartBody = MultipartBody.Builder()
-        val file = File( Environment.getExternalStorageDirectory(), "audio.3gp").path
-        val fileBody = RequestBody.create(MediaType.parse("3gp"), file)
+        val file = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) getFilePath() else getFileDescriptor2().toString()
+        val fileBody = RequestBody.create(MediaType.parse("mp3"), file)
 
-        multipartBody.addFormDataPart("sound", "audio.3gp", fileBody)
+        multipartBody.addFormDataPart("sound", "audio.mp3", fileBody)
 
         val postServices = DataRepository.create(baseUrl)
         val body = multipartBody.build()
@@ -367,18 +369,86 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == RESULT_OK) {
+    private fun getFileDescriptor(): FileDescriptor {
+        var displayName: String? = null
+        var relativePath: String? = null
+        var media_id: String? = null
+        val filePathColumn =
+            arrayOf(MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DISPLAY_NAME)
+        var uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        val selection = "${MediaStore.Audio.Media.DISPLAY_NAME} = ?"
+        val selectionArgs = arrayOf("audio.mp3")
+        var cursor: Cursor? = null
+        try {
+            cursor = getContentResolver().query(uri, filePathColumn, selection, selectionArgs, null)
+            if (cursor != null) {
+                //cursor.moveToFirst()
+                while (cursor.moveToNext()) {
+                    var idColumn: Int = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+                    var nameColumn: Int =
+                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
+                    val uri: Uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+                    relativePath =
+                        ContentUris.withAppendedId(uri, cursor.getLong(idColumn)).toString()
+                    displayName = cursor.getString(nameColumn)
+                    media_id = cursor.getLong(idColumn).toString()
 
-            // Great! User has recorded and saved the audio file
-            if (data != null) {
-                val savedUri: String? = data.getStringExtra("result")
-                Log.d("debug", "Record Path:$savedUri")
+                }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close()
             }
         }
-        else if (resultCode == RESULT_CANCELED) {
-            // Oops! User has canceled the recording
+
+        var resolver: ContentResolver = applicationContext.contentResolver
+        var audioCollection: Uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        val values = ContentValues().apply {
+            put(MediaStore.Audio.Media.DISPLAY_NAME, "audio.mp3")
+            //put(MediaStore.Audio.Media.TITLE, "test_audio")
+            put(MediaStore.Audio.Media.MIME_TYPE, "audio/*")
+            put(MediaStore.Audio.Media.RELATIVE_PATH, getAudioDirectoryPath())
+            //put(MediaStore.Audio.Media.IS_PENDING, 1)
         }
+        if (!relativePath.isNullOrEmpty()) {
+            audioUri = Uri.parse(relativePath)
+        } else {
+            audioUri = resolver.insert(audioCollection, values)
+        }
+        var parcelFileDescriptor: ParcelFileDescriptor =
+            resolver.openFileDescriptor(audioUri!!, "wt")!!
+        return parcelFileDescriptor.fileDescriptor
+    }
+
+    private fun getFileDescriptor2(): FileDescriptor {
+        var parcelFileDescriptor: ParcelFileDescriptor =
+            contentResolver.openFileDescriptor(audioUri!!, "r")!!
+        return parcelFileDescriptor.fileDescriptor
+    }
+
+    private fun getFilePath(): String {
+        var directory: File? =
+            getAppSpecificAlbumStorageDir(this, Environment.DIRECTORY_MUSIC, "iqra")
+        var file: File = File(directory, "audio.mp3")
+        return file.absolutePath
+    }
+
+    fun getAudioDirectoryPath(): String{
+        return Environment.DIRECTORY_MUSIC + File.separator + "iqra" + File.separator
+    }
+
+    fun getAppSpecificAlbumStorageDir(context: Context, albumName: String, subAlbumName: String): File? {
+        // Get the pictures directory that's inside the app-specific directory on
+        // external storage.
+        val file = File(
+            context.getExternalFilesDir(
+                albumName
+            ), subAlbumName
+        )
+        if (!file?.mkdirs()) {
+            Log.e("fssfsf", "Directory not created")
+        }
+
+        return file
     }
 }
