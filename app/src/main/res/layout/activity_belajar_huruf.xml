@@ -63,29 +63,16 @@
             android:layout_marginTop="@dimen/space10"/>
 
         <LinearLayout
-            android:layout_width="320dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space15"
+            android:layout_width="286dp"
+            android:layout_height="197dp"
+            android:layout_marginTop="@dimen/space20"
             android:gravity="center">
 
             <ImageView
                 android:id="@+id/imgMic"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/record_btn_recording" />
-
-            <TextView
-                android:id="@+id/outText"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/space5"
-                android:text="Benar"
-                android:textAlignment="center" />
-
-            <ImageView
-                android:id="@+id/imgRestart"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="136dp"
+                android:layout_height="130dp"
+                android:layout_marginEnd="@dimen/space0"
                 android:src="@drawable/record_btn_recording" />
 
 <!--            <ImageView-->

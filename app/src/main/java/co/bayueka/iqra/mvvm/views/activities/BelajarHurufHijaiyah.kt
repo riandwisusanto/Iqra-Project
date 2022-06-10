@@ -60,7 +60,7 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
 
     private var lastNumber = 0
     var audioUri: Uri? = null
-    private var baseUrl = "http://11.11.11.251:5000/"
+    private var baseUrl = "http://11.11.11.252:5000/"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -291,10 +291,6 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
                 }
             }
         }
-
-        binding.imgRestart.setOnClickListener {
-            toTrainPython()
-        }
     }
 
     @SuppressLint("NewApi")
@@ -305,7 +301,7 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
             mediaRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                mediaRecorder!!.setOutputFile(getFilePath())
+                mediaRecorder!!.setOutputFile(getFilePath().absolutePath)
             } else {
                 mediaRecorder!!.setOutputFile(getFileDescriptor())
             }
@@ -323,15 +319,22 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
             mediaRecorder?.release()
             mediaRecorder = null
         }
+
+        toTrainPython()
     }
 
     private fun toTrainPython(){
         showLoading()
         val multipartBody = MultipartBody.Builder()
-        val file = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) getFilePath() else getFileDescriptor2().toString()
-        val fileBody = RequestBody.create(MediaType.parse("mp3"), file)
-
-        multipartBody.addFormDataPart("sound", "audio.mp3", fileBody)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            val fileBody = RequestBody.create(MediaType.parse("audio/*"), getFilePath())
+            multipartBody.addFormDataPart("sound", "audio.mp3", fileBody)
+        }
+        else{
+            val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).path + "/iqra/audio.mp3")
+            val fileBody = RequestBody.create(MediaType.parse("audio/*"), file)
+            multipartBody.addFormDataPart("sound", "audio.mp3", fileBody)
+        }
 
         val postServices = DataRepository.create(baseUrl)
         val body = multipartBody.build()
@@ -375,7 +378,7 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
         var media_id: String? = null
         val filePathColumn =
             arrayOf(MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DISPLAY_NAME)
-        var uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        val uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         val selection = "${MediaStore.Audio.Media.DISPLAY_NAME} = ?"
         val selectionArgs = arrayOf("audio.mp3")
         var cursor: Cursor? = null
@@ -384,8 +387,8 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
             if (cursor != null) {
                 //cursor.moveToFirst()
                 while (cursor.moveToNext()) {
-                    var idColumn: Int = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-                    var nameColumn: Int =
+                    val idColumn: Int = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+                    val nameColumn: Int =
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
                     val uri: Uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
                     relativePath =
@@ -401,8 +404,8 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
             }
         }
 
-        var resolver: ContentResolver = applicationContext.contentResolver
-        var audioCollection: Uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        val resolver: ContentResolver = applicationContext.contentResolver
+        val audioCollection: Uri = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         val values = ContentValues().apply {
             put(MediaStore.Audio.Media.DISPLAY_NAME, "audio.mp3")
             //put(MediaStore.Audio.Media.TITLE, "test_audio")
@@ -415,22 +418,22 @@ class BelajarHurufHijaiyah : AppCompatActivity() {
         } else {
             audioUri = resolver.insert(audioCollection, values)
         }
-        var parcelFileDescriptor: ParcelFileDescriptor =
-            resolver.openFileDescriptor(audioUri!!, "wt")!!
+        val parcelFileDescriptor: ParcelFileDescriptor =
+            resolver.openFileDescriptor(audioUri!!, "rwt")!!
         return parcelFileDescriptor.fileDescriptor
     }
 
     private fun getFileDescriptor2(): FileDescriptor {
-        var parcelFileDescriptor: ParcelFileDescriptor =
+        val parcelFileDescriptor: ParcelFileDescriptor =
             contentResolver.openFileDescriptor(audioUri!!, "r")!!
         return parcelFileDescriptor.fileDescriptor
     }
 
-    private fun getFilePath(): String {
-        var directory: File? =
+    private fun getFilePath(): File {
+        val directory: File? =
             getAppSpecificAlbumStorageDir(this, Environment.DIRECTORY_MUSIC, "iqra")
-        var file: File = File(directory, "audio.mp3")
-        return file.absolutePath
+        val file: File = File(directory, "audio.mp3")
+        return file
     }
 
     fun getAudioDirectoryPath(): String{

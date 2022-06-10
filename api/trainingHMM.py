@@ -249,6 +249,7 @@ def train(audio):
     #HASIL TESTING
     pos=np.argmax(res, axis=0)[0]
 
+    # os.remove("audio.mp3")
     # os.remove("audio.wav")
     return spoken_load[pos]
 
@@ -260,14 +261,14 @@ def loadAudio():
     save_path = os.path.join(filename)
     audio.save(save_path)
 
-    to_url   = "sound/audio.wav"
-    # os.system('ffmpeg -i '+filename+' '+to_url)
+    to_url   = "audio.wav"
+    os.system('ffmpeg -i '+filename+' '+to_url)
     # os.remove(filename)
 
-    return jsonify("p")
+    # return jsonify("p")
 
-    # _ , d = wavfile.read("audio.wav")
+    _ , d = wavfile.read("audio.wav")
 
-    # return jsonify(train(d))
+    return jsonify(train(d))
 
 app.run(debug=True, host='0.0.0.0', port=5000)
